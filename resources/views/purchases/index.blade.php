@@ -2,7 +2,7 @@
     <div class="flex items-center justify-between mb-8">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Achats</h1>
-            <p class="text-gray-500">Suivez vos achats d'aluminium et matières premières</p>
+            <p class="text-gray-500">Suivez vos achats et gérez le stock automatiquement</p>
         </div>
         <a href="{{ route('purchases.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition">
             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -11,6 +11,12 @@
             Nouvel Achat
         </a>
     </div>
+
+    @if (session('success'))
+        <div class="mb-6 p-4 bg-green-100 border border-green-200 text-green-700 rounded-xl">
+            {{ session('success') }}
+        </div>
+    @endif
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -64,9 +70,14 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                @forelse (\App\Models\Purchase::with('supplier')->latest()->take(10)->get() as $purchase)
+                @forelse (\App\Models\Purchase::with(['supplier', 'items'])->latest()->take(10)->get() as $purchase)
                     <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                        <td class="px-6 py-4 font-bold text-blue-600">#ACH-{{ str_pad($purchase->id, 4, '0', STR_PAD_LEFT) }}</td>
+                        <td class="px-6 py-4">
+                            <a href="{{ route('purchases.show', $purchase) }}" class="font-bold text-blue-600 hover:underline">#ACH-{{ str_pad($purchase->id, 4, '0', STR_PAD_LEFT) }}</a>
+                            @if($purchase->items->count() > 0)
+                                <div class="text-xs text-gray-400 mt-1">{{ $purchase->items->count() }} article(s)</div>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $purchase->supplier->name ?? 'N/A' }}</td>
                         <td class="px-6 py-4 text-gray-500">{{ \Carbon\Carbon::parse($purchase->purchase_date)->format('d/m/Y') }}</td>
                         <td class="px-6 py-4 font-bold text-gray-900 dark:text-gray-100">{{ number_format($purchase->total_amount, 2, ',', '.') }} MAD</td>

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\QuoteController;
@@ -19,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::resource('clients', ClientController::class);
     Route::resource('suppliers', SupplierController::class);
+    Route::resource('articles', ArticleController::class);
     Route::resource('purchases', PurchaseController::class);
     Route::resource('invoices', InvoiceController::class);
     Route::resource('quotes', QuoteController::class);
@@ -27,6 +29,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pos', function () {
         return view('pos.index');
     })->name('pos.index');
+    
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\SettingController::class, 'index'])->name('index');
+        Route::post('/categories', [\App\Http\Controllers\SettingController::class, 'updateCategories'])->name('update-categories');
+        Route::post('/types', [\App\Http\Controllers\SettingController::class, 'updateTypes'])->name('update-types');
+    });
+    
+    Route::post('/pos/checkout', [\App\Http\Controllers\PosController::class, 'checkout'])->name('pos.checkout');
+    Route::post('/pos/pending', [\App\Http\Controllers\PosController::class, 'savePending'])->name('pos.pending');
     
     Route::get('/reports', function () {
         return view('reports.index');

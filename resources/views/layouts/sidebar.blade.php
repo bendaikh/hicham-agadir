@@ -67,6 +67,10 @@
                 Fournisseurs
             </x-sidebar-link-new>
 
+            <x-sidebar-link-new :href="route('articles.index')" :active="request()->routeIs('articles.*')" icon="package" :collapsed="false">
+                Articles
+            </x-sidebar-link-new>
+
             <x-sidebar-link-new :href="route('purchases.index')" :active="request()->routeIs('purchases.*')" icon="shopping-cart" :collapsed="false">
                 Achats
             </x-sidebar-link-new>
@@ -99,6 +103,15 @@
 
             <x-sidebar-link-new :href="route('reports.index')" :active="request()->routeIs('reports.*')" icon="bar-chart" :collapsed="false">
                 Rapports
+            </x-sidebar-link-new>
+
+            <!-- Settings Section -->
+            <div x-show="!collapsed" class="px-3 mt-6 mb-3">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Paramètres</span>
+            </div>
+
+            <x-sidebar-link-new :href="route('settings.index')" :active="request()->routeIs('settings.*')" icon="settings" :collapsed="false">
+                Paramètres
             </x-sidebar-link-new>
         </nav>
 

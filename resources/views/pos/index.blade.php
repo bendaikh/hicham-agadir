@@ -1,11 +1,20 @@
 <x-app-layout>
-    <div x-data="{ cartOpen: false }" class="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-200px)]">
+    @php
+        $articles = \App\Models\Article::where('is_active', true)->where('stock_quantity', '>', 0)->get();
+        // Get categories from settings, fallback to article categories if settings not available
+        $categories = \App\Models\Setting::getArticleCategories();
+        // Also get categories from existing articles to show all
+        $articleCategories = \App\Models\Article::where('is_active', true)->distinct()->pluck('category')->filter()->toArray();
+        $categories = array_unique(array_merge($categories, $articleCategories));
+    @endphp
+    
+    <div x-data="posCart()" class="flex flex-col lg:flex-row gap-6 min-h-[calc(100vh-200px)]">
         <!-- Left: Product Selection -->
         <div class="flex-1 flex flex-col">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Terminal POS</h1>
-                    <p class="text-sm text-gray-500">Vente rapide de produits aluminium</p>
+                    <p class="text-sm text-gray-500">Vente rapide de produits - {{ $articles->count() }} articles disponibles</p>
                 </div>
                 
                 <!-- Mobile Cart Button -->
@@ -14,23 +23,21 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                     <span>Panier</span>
-                    <span class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">0</span>
+                    <span x-show="cartItems.length > 0" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center" x-text="cartItems.length"></span>
                 </button>
             </div>
 
             <!-- Categories -->
             <div class="flex gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                <button class="px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap shadow-lg shadow-blue-500/25">Tous</button>
-                <button class="px-3 sm:px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap hover:bg-gray-50 hover:border-blue-300 transition">Profilés</button>
-                <button class="px-3 sm:px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap hover:bg-gray-50 hover:border-blue-300 transition">Fenêtres</button>
-                <button class="px-3 sm:px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap hover:bg-gray-50 hover:border-blue-300 transition">Portes</button>
-                <button class="px-3 sm:px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap hover:bg-gray-50 hover:border-blue-300 transition">Accessoires</button>
-                <button class="px-3 sm:px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap hover:bg-gray-50 hover:border-blue-300 transition">Vitrage</button>
+                <button @click="selectedCategory = 'all'" :class="selectedCategory === 'all' ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-blue-300'" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition">Tous</button>
+                @foreach ($categories as $category)
+                    <button @click="selectedCategory = '{{ $category }}'" :class="selectedCategory === '{{ $category }}' ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:border-blue-300'" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition">{{ $category }}</button>
+                @endforeach
             </div>
 
             <!-- Search -->
             <div class="relative mb-4 sm:mb-6">
-                <input type="text" placeholder="Rechercher un produit..." class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <input type="text" id="searchInput" placeholder="Rechercher un produit..." class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                 <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -38,32 +45,62 @@
 
             <!-- Products Grid -->
             <div class="flex-1 overflow-y-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                    @foreach ([
-                        ['name' => 'Profilé Coulissant 7024', 'price' => 185.00, 'unit' => 'ml', 'stock' => 250],
-                        ['name' => 'Profilé Battant Standard', 'price' => 145.00, 'unit' => 'ml', 'stock' => 180],
-                        ['name' => 'Fenêtre 120x120 cm', 'price' => 2400.00, 'unit' => 'unité', 'stock' => 12],
-                        ['name' => 'Porte Battante 90x210', 'price' => 3200.00, 'unit' => 'unité', 'stock' => 8],
-                        ['name' => 'Vitrage 4mm Clair', 'price' => 120.00, 'unit' => 'm²', 'stock' => 500],
-                        ['name' => 'Vitrage 6mm Fumé', 'price' => 180.00, 'unit' => 'm²', 'stock' => 300],
-                        ['name' => 'Poignée Standard', 'price' => 85.00, 'unit' => 'unité', 'stock' => 150],
-                        ['name' => 'Serrure Multi-point', 'price' => 450.00, 'unit' => 'unité', 'stock' => 45],
-                    ] as $product)
-                        <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-blue-300 hover:shadow-lg cursor-pointer transition-all duration-200 group">
-                            <div class="h-16 sm:h-24 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-gray-700 dark:to-gray-600 rounded-xl mb-2 sm:mb-3 flex items-center justify-center">
-                                <svg class="w-8 sm:w-10 h-8 sm:h-10 text-slate-300 group-hover:text-blue-400 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                </svg>
+                @if($articles->count() > 0)
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                        @foreach ($articles as $article)
+                            <div x-show="selectedCategory === 'all' || selectedCategory === '{{ $article->category }}'"
+                                 @click="addToCart({{ $article->id }}, '{{ addslashes($article->designation) }}', {{ $article->selling_price }}, '{{ $article->unit }}', '{{ $article->image_url ?? '' }}', {{ $article->stock_quantity }})"
+                                 class="product-card bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-blue-300 hover:shadow-lg cursor-pointer transition-all duration-200 group active:scale-95"
+                                 data-name="{{ strtolower($article->designation . ' ' . $article->reference . ' ' . $article->type . ' ' . $article->color) }}">
+                                <div class="h-16 sm:h-24 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-gray-700 dark:to-gray-600 rounded-xl mb-2 sm:mb-3 flex items-center justify-center relative overflow-hidden">
+                                    @if($article->image)
+                                        <img src="{{ $article->image_url }}" alt="{{ $article->designation }}" class="w-full h-full object-cover">
+                                    @else
+                                        <svg class="w-8 sm:w-10 h-8 sm:h-10 text-slate-300 group-hover:text-blue-400 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                        </svg>
+                                    @endif
+                                    @if($article->isLowStock())
+                                        <span class="absolute top-1 right-1 px-1.5 py-0.5 bg-orange-500 text-white text-[10px] rounded font-bold">Stock bas</span>
+                                    @endif
+                                </div>
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-xs sm:text-sm mb-1 truncate" title="{{ $article->full_designation }}">
+                                    {{ $article->designation }}
+                                </h3>
+                                <div class="text-[10px] sm:text-xs text-gray-500 mb-1 truncate">
+                                    {{ $article->reference }}
+                                    @if($article->thickness) - {{ $article->thickness }} @endif
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-blue-600 font-bold text-sm sm:text-base">{{ number_format($article->selling_price, 0, ',', '.') }}</span>
+                                    <span class="text-[10px] sm:text-xs text-gray-400">MAD/{{ $article->unit }}</span>
+                                </div>
+                                <div class="mt-1 sm:mt-2 flex items-center justify-between">
+                                    <span class="text-[10px] sm:text-xs text-gray-400">Stock: {{ $article->stock_quantity }}</span>
+                                    @if($article->surface_area)
+                                        <span class="text-[10px] sm:text-xs text-gray-400">{{ number_format($article->surface_area, 2, ',', '.') }} M²</span>
+                                    @endif
+                                </div>
                             </div>
-                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-xs sm:text-sm mb-1 truncate">{{ $product['name'] }}</h3>
-                            <div class="flex items-center justify-between">
-                                <span class="text-blue-600 font-bold text-sm sm:text-base">{{ number_format($product['price'], 0, ',', '.') }}</span>
-                                <span class="text-[10px] sm:text-xs text-gray-400">MAD/{{ $product['unit'] }}</span>
-                            </div>
-                            <div class="mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-400">Stock: {{ $product['stock'] }}</div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-16">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Aucun article en stock</h3>
+                        <p class="text-gray-500 mb-4">Commencez par créer des articles et effectuer des achats pour alimenter le stock.</p>
+                        <div class="flex items-center justify-center gap-3">
+                            <a href="{{ route('articles.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition">
+                                Créer un article
+                            </a>
+                            <a href="{{ route('purchases.create') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-200 transition">
+                                Effectuer un achat
+                            </a>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -71,16 +108,16 @@
         <div class="hidden lg:flex w-80 xl:w-96 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 flex-col shadow-xl">
             <div class="p-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-slate-50 to-white rounded-t-2xl">
                 <div class="flex items-center justify-between">
-                    <h2 class="font-bold text-gray-900 dark:text-gray-100">Panier</h2>
-                    <button class="text-red-500 text-sm font-semibold hover:underline">Vider</button>
+                    <h2 class="font-bold text-gray-900 dark:text-gray-100">Panier <span x-show="cartItems.length > 0" class="text-sm font-normal text-gray-500" x-text="'(' + cartItems.length + ')'"></span></h2>
+                    <button @click="clearCart()" x-show="cartItems.length > 0" class="text-red-500 text-sm font-semibold hover:underline">Vider</button>
                 </div>
             </div>
 
             <!-- Client Selection -->
             <div class="p-4 border-b border-gray-100 dark:border-gray-700">
                 <label class="block text-xs text-gray-500 mb-2">Client</label>
-                <select class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
-                    <option>Client comptoir</option>
+                <select x-model="selectedClient" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
+                    <option value="">Client comptoir</option>
                     @foreach (\App\Models\Client::all() as $client)
                         <option value="{{ $client->id }}">{{ $client->name }}</option>
                     @endforeach
@@ -89,38 +126,86 @@
 
             <!-- Cart Items -->
             <div class="flex-1 overflow-y-auto p-4">
-                <div class="text-center py-12 text-gray-400">
+                <div x-show="cartItems.length === 0" class="text-center py-12 text-gray-400">
                     <svg class="w-16 h-16 mx-auto mb-4 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                     <p class="text-sm font-medium">Panier vide</p>
                     <p class="text-xs mt-1">Cliquez sur un produit pour l'ajouter</p>
                 </div>
+                
+                <template x-for="(item, index) in cartItems" :key="'cart-' + item.id + '-' + index">
+                    <div class="bg-white dark:bg-gray-700 rounded-xl p-3 mb-3 border border-gray-100 dark:border-gray-600">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                <img x-show="item.image" :src="item.image" :alt="item.name" class="w-full h-full object-cover">
+                                <div x-show="!item.image" class="w-full h-full flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate" x-text="item.name"></h4>
+                                <p class="text-xs text-gray-500" x-text="formatPrice(item.price) + ' / ' + item.unit"></p>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <button @click="decreaseQuantity(index)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">-</button>
+                                    <input type="number" x-model.number="item.quantity" @input="updateQuantity(index)" min="1" :max="item.stock" class="w-12 text-center text-sm font-semibold border-0 bg-transparent focus:outline-none">
+                                    <button @click="increaseQuantity(index)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">+</button>
+                                    <button @click="removeItem(index)" class="ml-auto text-red-500 hover:text-red-700">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" x-text="'Stock: ' + item.stock"></p>
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-gray-100 dark:border-gray-600 flex justify-between items-center">
+                            <span class="text-xs text-gray-500">Sous-total</span>
+                            <span class="font-bold text-blue-600" x-text="formatPrice(item.price * item.quantity)"></span>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <!-- Totals -->
             <div class="p-4 border-t border-gray-100 dark:border-gray-700 space-y-3 bg-slate-50/50">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500">Sous-total</span>
-                    <span class="font-medium">0,00 MAD</span>
+                    <span class="font-medium" x-text="formatPrice(subtotal)"></span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500">TVA (20%)</span>
-                    <span class="font-medium">0,00 MAD</span>
+                    <span class="font-medium" x-text="formatPrice(tax)"></span>
                 </div>
                 <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-3">
                     <span>Total</span>
-                    <span class="text-blue-600">0,00 MAD</span>
+                    <span class="text-blue-600" x-text="formatPrice(total)"></span>
                 </div>
             </div>
 
             <!-- Actions -->
             <div class="p-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-2 gap-3">
-                <button class="px-4 py-3 bg-slate-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-slate-200 transition">
-                    En attente
+                <button @click="savePending()" :disabled="cartItems.length === 0 || processing" class="px-4 py-3 bg-slate-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="!processing">En attente</span>
+                    <span x-show="processing" class="flex items-center justify-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Enregistrement...
+                    </span>
                 </button>
-                <button class="px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-semibold text-sm hover:from-blue-700 hover:to-cyan-600 shadow-lg shadow-blue-500/25 transition">
-                    Encaisser
+                <button @click="checkout()" :disabled="cartItems.length === 0 || processing" class="px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-semibold text-sm hover:from-blue-700 hover:to-cyan-600 shadow-lg shadow-blue-500/25 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="!processing">Encaisser</span>
+                    <span x-show="processing" class="flex items-center justify-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Traitement...
+                    </span>
                 </button>
             </div>
         </div>
@@ -164,8 +249,8 @@
             <!-- Client Selection -->
             <div class="p-4 border-b border-gray-100">
                 <label class="block text-xs text-gray-500 mb-2">Client</label>
-                <select class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Client comptoir</option>
+                <select x-model="selectedClient" class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Client comptoir</option>
                     @foreach (\App\Models\Client::all() as $client)
                         <option value="{{ $client->id }}">{{ $client->name }}</option>
                     @endforeach
@@ -174,39 +259,288 @@
 
             <!-- Cart Items -->
             <div class="flex-1 overflow-y-auto p-4">
-                <div class="text-center py-8 text-gray-400">
+                <div x-show="cartItems.length === 0" class="text-center py-8 text-gray-400">
                     <svg class="w-12 h-12 mx-auto mb-3 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                     <p class="text-sm">Panier vide</p>
                 </div>
+                
+                <template x-for="(item, index) in cartItems" :key="'cart-mobile-' + item.id + '-' + index">
+                    <div class="bg-white rounded-xl p-3 mb-3 border border-gray-100">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                <img x-show="item.image" :src="item.image" :alt="item.name" class="w-full h-full object-cover">
+                                <div x-show="!item.image" class="w-full h-full flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-semibold text-sm text-gray-900 truncate" x-text="item.name"></h4>
+                                <p class="text-xs text-gray-500" x-text="formatPrice(item.price) + ' / ' + item.unit"></p>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <button @click="decreaseQuantity(index)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">-</button>
+                                    <input type="number" x-model.number="item.quantity" @input="updateQuantity(index)" min="1" :max="item.stock" class="w-12 text-center text-sm font-semibold border-0 bg-transparent focus:outline-none">
+                                    <button @click="increaseQuantity(index)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">+</button>
+                                    <button @click="removeItem(index)" class="ml-auto text-red-500 hover:text-red-700">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" x-text="'Stock: ' + item.stock"></p>
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                            <span class="text-xs text-gray-500">Sous-total</span>
+                            <span class="font-bold text-blue-600" x-text="formatPrice(item.price * item.quantity)"></span>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <!-- Totals -->
             <div class="p-4 border-t border-gray-100 space-y-2 bg-slate-50">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500">Sous-total</span>
-                    <span class="font-medium">0,00 MAD</span>
+                    <span class="font-medium" x-text="formatPrice(subtotal)"></span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500">TVA (20%)</span>
-                    <span class="font-medium">0,00 MAD</span>
+                    <span class="font-medium" x-text="formatPrice(tax)"></span>
                 </div>
                 <div class="flex justify-between text-lg font-bold border-t pt-2">
                     <span>Total</span>
-                    <span class="text-blue-600">0,00 MAD</span>
+                    <span class="text-blue-600" x-text="formatPrice(total)"></span>
                 </div>
             </div>
 
             <!-- Actions -->
             <div class="p-4 border-t border-gray-100 grid grid-cols-2 gap-3 pb-safe">
-                <button class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm">
-                    En attente
+                <button @click="savePending()" :disabled="cartItems.length === 0 || processing" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="!processing">En attente</span>
+                    <span x-show="processing" class="flex items-center justify-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Enregistrement...
+                    </span>
                 </button>
-                <button class="px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25">
-                    Encaisser
+                <button @click="checkout()" :disabled="cartItems.length === 0 || processing" class="px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="!processing">Encaisser</span>
+                    <span x-show="processing" class="flex items-center justify-center gap-2">
+                        <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Traitement...
+                    </span>
                 </button>
             </div>
         </div>
     </div>
+
+    <script>
+        function posCart() {
+            return {
+                cartOpen: false,
+                selectedCategory: 'all',
+                selectedClient: '',
+                cartItems: [],
+                processing: false,
+                
+                get subtotal() {
+                    return this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                },
+                
+                get tax() {
+                    return this.subtotal * 0.20;
+                },
+                
+                get total() {
+                    return this.subtotal + this.tax;
+                },
+                
+                addToCart(id, name, price, unit, image, stock) {
+                    const existingItem = this.cartItems.find(item => item.id === id);
+                    
+                    if (existingItem) {
+                        if (existingItem.quantity < stock) {
+                            existingItem.quantity++;
+                        } else {
+                            alert('Stock insuffisant! Stock disponible: ' + stock);
+                        }
+                    } else {
+                        this.cartItems.push({
+                            id: id,
+                            name: name,
+                            price: parseFloat(price),
+                            unit: unit,
+                            image: image || '',
+                            quantity: 1,
+                            stock: stock
+                        });
+                    }
+                    
+                    // Open cart on mobile
+                    if (window.innerWidth < 1024) {
+                        this.cartOpen = true;
+                    }
+                },
+                
+                increaseQuantity(index) {
+                    const item = this.cartItems[index];
+                    if (item.quantity < item.stock) {
+                        item.quantity++;
+                    } else {
+                        alert('Stock insuffisant! Stock disponible: ' + item.stock);
+                    }
+                },
+                
+                decreaseQuantity(index) {
+                    const item = this.cartItems[index];
+                    if (item.quantity > 1) {
+                        item.quantity--;
+                    } else {
+                        this.removeItem(index);
+                    }
+                },
+                
+                updateQuantity(index) {
+                    const item = this.cartItems[index];
+                    if (item.quantity < 1) {
+                        item.quantity = 1;
+                    } else if (item.quantity > item.stock) {
+                        item.quantity = item.stock;
+                        alert('Stock insuffisant! Quantité ajustée au stock disponible.');
+                    }
+                },
+                
+                removeItem(index) {
+                    this.cartItems.splice(index, 1);
+                },
+                
+                clearCart() {
+                    if (confirm('Voulez-vous vider le panier?')) {
+                        this.cartItems = [];
+                    }
+                },
+                
+                async checkout() {
+                    if (this.cartItems.length === 0) {
+                        alert('Le panier est vide!');
+                        return;
+                    }
+
+                    this.processing = true;
+
+                    try {
+                        const response = await fetch('{{ route("pos.checkout") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                client_id: this.selectedClient || null,
+                                items: this.cartItems.map(item => ({
+                                    id: item.id,
+                                    quantity: item.quantity,
+                                    price: item.price
+                                })),
+                                subtotal: this.subtotal,
+                                tax: this.tax,
+                                total: this.total
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            alert('✅ ' + data.message + '\nFacture: ' + data.invoice_number);
+                            this.cartItems = [];
+                            this.selectedClient = '';
+                            // Optionally redirect to invoice
+                            // window.location.href = '/invoices/' + data.invoice_id;
+                        } else {
+                            alert('❌ ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('❌ Erreur lors de l\'encaissement. Veuillez réessayer.');
+                    } finally {
+                        this.processing = false;
+                    }
+                },
+                
+                async savePending() {
+                    if (this.cartItems.length === 0) {
+                        alert('Le panier est vide!');
+                        return;
+                    }
+
+                    this.processing = true;
+
+                    try {
+                        const response = await fetch('{{ route("pos.pending") }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                client_id: this.selectedClient || null,
+                                items: this.cartItems.map(item => ({
+                                    id: item.id,
+                                    quantity: item.quantity,
+                                    price: item.price
+                                })),
+                                subtotal: this.subtotal,
+                                tax: this.tax,
+                                total: this.total
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            alert('✅ ' + data.message + '\nFacture: ' + data.invoice_number);
+                            this.cartItems = [];
+                            this.selectedClient = '';
+                        } else {
+                            alert('❌ ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('❌ Erreur lors de l\'enregistrement. Veuillez réessayer.');
+                    } finally {
+                        this.processing = false;
+                    }
+                },
+                
+                formatPrice(value) {
+                    return new Intl.NumberFormat('fr-MA', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(value || 0) + ' MAD';
+                }
+            }
+        }
+        
+        // Simple search functionality
+        document.getElementById('searchInput')?.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.product-card').forEach(card => {
+                const name = card.dataset.name || '';
+                if (name.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </x-app-layout>

@@ -171,7 +171,7 @@
                     </div>
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $invoice->client->name }}</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $invoice->client->name ?? 'Client comptoir' }}</p>
                             <p class="text-xs text-gray-500">{{ $invoice->created_at->format('d M, Y') }}</p>
                         </div>
                         <span class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ number_format($invoice->total_amount, 0, ',', '.') }} MAD</span>
@@ -201,7 +201,7 @@
                     @forelse ($recentInvoices as $invoice)
                         <tr class="text-sm hover:bg-gray-50/50 transition-colors">
                             <td class="px-6 py-4 font-bold text-blue-600">#INV-{{ str_pad($invoice->id, 4, '0', STR_PAD_LEFT) }}</td>
-                            <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $invoice->client->name }}</td>
+                            <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $invoice->client->name ?? 'Client comptoir' }}</td>
                             <td class="px-6 py-4 text-gray-500">{{ $invoice->created_at->format('d M, Y') }}</td>
                             <td class="px-6 py-4 font-bold text-gray-900 dark:text-gray-100">{{ number_format($invoice->total_amount, 2, ',', '.') }} MAD</td>
                             <td class="px-6 py-4">

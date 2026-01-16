@@ -12,6 +12,12 @@
         </a>
     </div>
 
+    @if (session('success'))
+        <div class="mb-6 p-4 bg-green-100 border border-green-200 text-green-700 rounded-xl">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -56,7 +62,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                @forelse (\App\Models\Supplier::latest()->take(10)->get() as $supplier)
+                @forelse ($suppliers as $supplier)
                     <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
@@ -102,5 +108,11 @@
                 @endforelse
             </tbody>
         </table>
+        
+        @if($suppliers->hasPages())
+            <div class="p-4 border-t border-gray-100 dark:border-gray-700">
+                {{ $suppliers->links() }}
+            </div>
+        @endif
     </div>
 </x-app-layout>
