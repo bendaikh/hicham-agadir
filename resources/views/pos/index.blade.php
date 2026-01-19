@@ -72,7 +72,7 @@
                                     @if($article->thickness) - {{ $article->thickness }} @endif
                                 </div>
                                 <div class="flex items-center justify-between">
-                                    <span class="text-blue-600 font-bold text-sm sm:text-base">{{ number_format($article->selling_price, 0, ',', '.') }}</span>
+                                    <span class="text-blue-600 font-bold text-sm sm:text-base">{{ number_format($article->selling_price, 2, ',', '.') }}</span>
                                     <span class="text-[10px] sm:text-xs text-gray-400">MAD/{{ $article->unit }}</span>
                                 </div>
                                 <div class="mt-1 sm:mt-2 flex items-center justify-between">
