@@ -35,7 +35,8 @@ class InvoiceController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $invoice = \App\Models\Invoice::with(['client', 'items.article', 'payments'])->findOrFail($id);
+        return view('invoices.show', compact('invoice'));
     }
 
     /**

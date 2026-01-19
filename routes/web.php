@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('purchases', PurchaseController::class);
     Route::resource('invoices', InvoiceController::class);
     Route::resource('quotes', QuoteController::class);
+    Route::post('/quotes/{quote}/convert-to-invoice', [QuoteController::class, 'convertToInvoice'])->name('quotes.convert-to-invoice');
     Route::resource('payments', PaymentController::class);
     
     Route::get('/pos', function () {
@@ -34,6 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [\App\Http\Controllers\SettingController::class, 'index'])->name('index');
         Route::post('/categories', [\App\Http\Controllers\SettingController::class, 'updateCategories'])->name('update-categories');
         Route::post('/types', [\App\Http\Controllers\SettingController::class, 'updateTypes'])->name('update-types');
+        Route::post('/business', [\App\Http\Controllers\SettingController::class, 'updateBusiness'])->name('update-business');
     });
     
     Route::post('/pos/checkout', [\App\Http\Controllers\PosController::class, 'checkout'])->name('pos.checkout');

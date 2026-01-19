@@ -17,6 +17,63 @@
             </div>
         @endif
 
+        <!-- Business Information -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Informations de l'Entreprise</h3>
+                    <p class="text-sm text-gray-500">Configurez le nom et le logo de votre entreprise pour les factures</p>
+                </div>
+            </div>
+
+            <form action="{{ route('settings.update-business') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom de l'Entreprise</label>
+                        <input type="text" name="business_name" value="{{ \App\Models\Setting::getBusinessName() }}" 
+                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Nom de votre entreprise">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Logo de l'Entreprise</label>
+                        @php
+                            $logoPath = \App\Models\Setting::getBusinessLogo();
+                            $logoUrl = $logoPath ? \Illuminate\Support\Facades\Storage::url($logoPath) : '';
+                        @endphp
+                        
+                        <div class="flex items-start gap-4">
+                            @if($logoUrl)
+                                <div class="flex-shrink-0">
+                                    <img src="{{ $logoUrl }}" alt="Logo" class="w-24 h-24 object-contain border border-gray-200 rounded-xl p-2 bg-white">
+                                    <p class="text-xs text-gray-500 mt-1">Logo actuel</p>
+                                </div>
+                            @endif
+                            
+                            <div class="flex-1">
+                                <input type="file" name="business_logo" accept="image/*" 
+                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Formats acceptés: JPG, PNG, GIF (max 2MB)</p>
+                                @if($logoUrl)
+                                    <label class="inline-flex items-center mt-2">
+                                        <input type="checkbox" name="remove_logo" value="1" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <span class="ml-2 text-sm text-gray-600">Supprimer le logo</span>
+                                    </label>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition">
+                        Enregistrer les informations
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <!-- Article Categories -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6">
             <div class="flex items-center justify-between mb-4">

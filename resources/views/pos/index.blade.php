@@ -185,6 +185,43 @@
                 </div>
             </div>
 
+            <!-- Payment Methods -->
+            <div class="p-4 border-t border-gray-100 dark:border-gray-700" x-show="cartItems.length > 0">
+                <label class="block text-xs font-semibold text-gray-500 mb-3">Méthodes de Paiement</label>
+                <div class="space-y-2">
+                    <template x-for="(payment, index) in payments" :key="index">
+                        <div class="flex items-center gap-2">
+                            <select x-model="payment.method" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100">
+                                <option value="cash">Espèces</option>
+                                <option value="card">Carte bancaire</option>
+                                <option value="cheque">Chèque</option>
+                                <option value="bank_transfer">Virement</option>
+                                <option value="mobile_payment">Paiement mobile</option>
+                            </select>
+                            <input type="number" x-model.number="payment.amount" @input="updatePaymentsTotal()" step="0.01" min="0" :max="total - paymentsTotal + payment.amount" placeholder="0.00" class="w-28 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100">
+                            <button @click="removePayment(index)" x-show="payments.length > 1" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                    <button @click="addPayment()" class="w-full px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 rounded-xl border border-blue-200 font-semibold transition">
+                        + Ajouter une méthode
+                    </button>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Total payé:</span>
+                        <span class="text-sm font-bold" :class="paymentsTotal >= total ? 'text-green-600' : 'text-orange-600'" x-text="formatPrice(paymentsTotal)"></span>
+                    </div>
+                    <div x-show="paymentsTotal < total" class="text-xs text-orange-600 font-medium">
+                        Reste à payer: <span x-text="formatPrice(total - paymentsTotal)"></span>
+                    </div>
+                    <div x-show="paymentsTotal > total" class="text-xs text-blue-600 font-medium">
+                        Monnaie: <span x-text="formatPrice(paymentsTotal - total)"></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="p-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-2 gap-3">
                 <button @click="savePending()" :disabled="cartItems.length === 0 || processing" class="px-4 py-3 bg-slate-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-slate-200 transition disabled:opacity-50 disabled:cursor-not-allowed">
@@ -317,6 +354,43 @@
                 </div>
             </div>
 
+            <!-- Payment Methods -->
+            <div class="p-4 border-t border-gray-100" x-show="cartItems.length > 0">
+                <label class="block text-xs font-semibold text-gray-500 mb-3">Méthodes de Paiement</label>
+                <div class="space-y-2">
+                    <template x-for="(payment, index) in payments" :key="index">
+                        <div class="flex items-center gap-2">
+                            <select x-model="payment.method" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="cash">Espèces</option>
+                                <option value="card">Carte bancaire</option>
+                                <option value="cheque">Chèque</option>
+                                <option value="bank_transfer">Virement</option>
+                                <option value="mobile_payment">Paiement mobile</option>
+                            </select>
+                            <input type="number" x-model.number="payment.amount" @input="updatePaymentsTotal()" step="0.01" min="0" :max="total - paymentsTotal + payment.amount" placeholder="0.00" class="w-28 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <button @click="removePayment(index)" x-show="payments.length > 1" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+                    <button @click="addPayment()" class="w-full px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 rounded-xl border border-blue-200 font-semibold transition">
+                        + Ajouter une méthode
+                    </button>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span class="text-sm font-semibold text-gray-700">Total payé:</span>
+                        <span class="text-sm font-bold" :class="paymentsTotal >= total ? 'text-green-600' : 'text-orange-600'" x-text="formatPrice(paymentsTotal)"></span>
+                    </div>
+                    <div x-show="paymentsTotal < total" class="text-xs text-orange-600 font-medium">
+                        Reste à payer: <span x-text="formatPrice(total - paymentsTotal)"></span>
+                    </div>
+                    <div x-show="paymentsTotal > total" class="text-xs text-blue-600 font-medium">
+                        Monnaie: <span x-text="formatPrice(paymentsTotal - total)"></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Actions -->
             <div class="p-4 border-t border-gray-100 grid grid-cols-2 gap-3 pb-safe">
                 <button @click="savePending()" :disabled="cartItems.length === 0 || processing" class="px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
@@ -350,6 +424,7 @@
                 selectedCategory: 'all',
                 selectedClient: '',
                 cartItems: [],
+                payments: [{ method: 'cash', amount: 0 }],
                 processing: false,
                 
                 get subtotal() {
@@ -362,6 +437,25 @@
                 
                 get total() {
                     return this.subtotal + this.tax;
+                },
+                
+                get paymentsTotal() {
+                    return this.payments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+                },
+                
+                addPayment() {
+                    this.payments.push({ method: 'cash', amount: 0 });
+                },
+                
+                removePayment(index) {
+                    if (this.payments.length > 1) {
+                        this.payments.splice(index, 1);
+                        this.updatePaymentsTotal();
+                    }
+                },
+                
+                updatePaymentsTotal() {
+                    // This method is called when payment amounts change
                 },
                 
                 addToCart(id, name, price, unit, image, stock) {
@@ -384,6 +478,13 @@
                             stock: stock
                         });
                     }
+                    
+                    // Auto-fill first payment with total
+                    setTimeout(() => {
+                        if (this.payments.length > 0 && this.total > 0) {
+                            this.payments[0].amount = this.total;
+                        }
+                    }, 100);
                     
                     // Open cart on mobile
                     if (window.innerWidth < 1024) {
@@ -426,12 +527,18 @@
                 clearCart() {
                     if (confirm('Voulez-vous vider le panier?')) {
                         this.cartItems = [];
+                        this.payments = [{ method: 'cash', amount: 0 }];
                     }
                 },
                 
                 async checkout() {
                     if (this.cartItems.length === 0) {
                         alert('Le panier est vide!');
+                        return;
+                    }
+
+                    if (this.paymentsTotal < this.total) {
+                        alert('Le montant payé est insuffisant!');
                         return;
                     }
 
@@ -453,7 +560,11 @@
                                 })),
                                 subtotal: this.subtotal,
                                 tax: this.tax,
-                                total: this.total
+                                total: this.total,
+                                payments: this.payments.filter(p => p.amount > 0).map(p => ({
+                                    method: p.method,
+                                    amount: parseFloat(p.amount)
+                                }))
                             })
                         });
 
@@ -463,8 +574,9 @@
                             alert('✅ ' + data.message + '\nFacture: ' + data.invoice_number);
                             this.cartItems = [];
                             this.selectedClient = '';
-                            // Optionally redirect to invoice
-                            // window.location.href = '/invoices/' + data.invoice_id;
+                            this.payments = [{ method: 'cash', amount: 0 }];
+                            // Redirect to invoice
+                            window.location.href = '/invoices/' + data.invoice_id;
                         } else {
                             alert('❌ ' + data.message);
                         }

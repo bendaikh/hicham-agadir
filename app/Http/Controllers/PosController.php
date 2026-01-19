@@ -26,6 +26,9 @@ class PosController extends Controller
             'subtotal' => 'required|numeric|min:0',
             'tax' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
+            'payments' => 'required|array|min:1',
+            'payments.*.method' => 'required|string|in:cash,card,cheque,bank_transfer,mobile_payment',
+            'payments.*.amount' => 'required|numeric|min:0',
         ]);
 
         try {
@@ -67,6 +70,19 @@ class PosController extends Controller
 
                 // Reduce stock
                 $article->reduceStock($item['quantity']);
+            }
+
+            // Create payment records
+            foreach ($validated['payments'] as $paymentData) {
+                if ($paymentData['amount'] > 0) {
+                    \App\Models\Payment::create([
+                        'payable_id' => $invoice->id,
+                        'payable_type' => Invoice::class,
+                        'amount' => $paymentData['amount'],
+                        'payment_method' => $paymentData['method'],
+                        'payment_date' => now(),
+                    ]);
+                }
             }
 
             DB::commit();

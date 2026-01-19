@@ -64,7 +64,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                @forelse (\App\Models\Invoice::with('client')->latest()->take(10)->get() as $invoice)
+                @forelse (\App\Models\Invoice::with('client')->latest()->get() as $invoice)
                     <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30">
                         <td class="px-6 py-4 font-bold text-blue-600">#{{ $invoice->invoice_number }}</td>
                         <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $invoice->client->name ?? 'N/A' }}</td>

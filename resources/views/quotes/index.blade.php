@@ -71,7 +71,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                @forelse (\App\Models\Quote::with('client')->latest()->take(10)->get() as $quote)
+                @forelse (\App\Models\Quote::with('client')->latest()->get() as $quote)
                     <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30">
                         <td class="px-6 py-4 font-bold text-blue-600">#{{ $quote->quote_number }}</td>
                         <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ $quote->client->name ?? 'N/A' }}</td>
@@ -108,11 +108,14 @@
                                     </svg>
                                 </a>
                                 @if($quote->status === 'pending')
-                                <button class="p-2 text-green-600 hover:bg-green-50 rounded-lg" title="Convertir en facture">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </button>
+                                <form action="{{ route('quotes.convert-to-invoice', $quote) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir convertir ce devis en facture?');">
+                                    @csrf
+                                    <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-lg" title="Convertir en facture">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </button>
+                                </form>
                                 @endif
                                 <a href="{{ route('quotes.edit', $quote) }}" class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg" title="Modifier">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

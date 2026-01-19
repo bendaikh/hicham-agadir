@@ -4,6 +4,11 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des Clients</h1>
             <p class="text-gray-500">Gérez votre portefeuille clients et leur historique</p>
         </div>
+        @if (session('success'))
+            <div class="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
+                {{ session('success') }}
+            </div>
+        @endif
         <a href="{{ route('clients.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 transition">
             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -68,7 +73,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                @forelse (\App\Models\Client::latest()->take(10)->get() as $client)
+                @forelse (\App\Models\Client::latest()->get() as $client)
                     <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">

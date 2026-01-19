@@ -27,7 +27,23 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+        ]);
+
+        $client = \App\Models\Client::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'balance' => 0,
+        ]);
+
+        return redirect()->route('clients.index')
+            ->with('success', 'Client créé avec succès!');
     }
 
     /**
@@ -53,7 +69,24 @@ class ClientController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $client = \App\Models\Client::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+        ]);
+
+        $client->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'address' => $validated['address'] ?? null,
+        ]);
+
+        return redirect()->route('clients.index')
+            ->with('success', 'Client mis à jour avec succès!');
     }
 
     /**
@@ -61,6 +94,10 @@ class ClientController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $client = \App\Models\Client::findOrFail($id);
+        $client->delete();
+
+        return redirect()->route('clients.index')
+            ->with('success', 'Client supprimé avec succès!');
     }
 }

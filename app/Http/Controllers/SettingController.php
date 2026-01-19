@@ -59,4 +59,55 @@ class SettingController extends Controller
         return redirect()->route('settings.index')
             ->with('success', 'Types mis à jour avec succès.');
     }
+
+    /**
+     * Update business information (name and logo)
+     */
+    public function updateBusiness(Request $request)
+    {
+        $validated = $request->validate([
+            'business_name' => 'nullable|string|max:255',
+            'business_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'remove_logo' => 'nullable|boolean',
+        ]);
+
+        // Update business name
+        if (isset($validated['business_name'])) {
+            Setting::setValue(
+                'business_name',
+                $validated['business_name'],
+                'Nom de l\'entreprise',
+                'Nom de l\'entreprise affiché sur les factures'
+            );
+        }
+
+        // Handle logo
+        if ($request->hasFile('business_logo')) {
+            $logo = $request->file('business_logo');
+            $logoPath = $logo->store('business', 'public');
+            
+            // Delete old logo if exists
+            $oldLogo = Setting::getValue('business_logo', '');
+            if ($oldLogo && \Storage::disk('public')->exists($oldLogo)) {
+                \Storage::disk('public')->delete($oldLogo);
+            }
+            
+            Setting::setValue(
+                'business_logo',
+                $logoPath,
+                'Logo de l\'entreprise',
+                'Logo de l\'entreprise affiché sur les factures'
+            );
+        } elseif ($request->has('remove_logo') && $request->remove_logo) {
+            // Remove logo
+            $oldLogo = Setting::getValue('business_logo', '');
+            if ($oldLogo && \Storage::disk('public')->exists($oldLogo)) {
+                \Storage::disk('public')->delete($oldLogo);
+            }
+            Setting::where('key', 'business_logo')->delete();
+        }
+
+        return redirect()->route('settings.index')
+            ->with('success', 'Informations de l\'entreprise mises à jour avec succès.');
+    }
 }

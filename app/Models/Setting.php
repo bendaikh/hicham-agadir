@@ -20,10 +20,20 @@ class Setting extends Model
     /**
      * Get setting value by key
      */
-    public static function getValue(string $key, $default = [])
+    public static function getValue(string $key, $default = null)
     {
         $setting = self::where('key', $key)->first();
-        return $setting ? $setting->value : $default;
+        if (!$setting) {
+            return $default;
+        }
+        
+        // If value is JSON array and default is array, return array
+        if (is_array($setting->value) && is_array($default)) {
+            return $setting->value;
+        }
+        
+        // Otherwise return the value as stored
+        return $setting->value;
     }
 
     /**
@@ -31,7 +41,21 @@ class Setting extends Model
      */
     public static function setValue(string $key, $value, $label = null, $description = null)
     {
-        // Ensure value is an array if it's not already
+        // For business_name and business_logo, wrap in array for JSON storage
+        // (since model uses 'array' cast, we need to store as array)
+        if (in_array($key, ['business_name', 'business_logo'])) {
+            $arrayValue = is_array($value) ? $value : [$value];
+            return self::updateOrCreate(
+                ['key' => $key],
+                [
+                    'value' => $arrayValue, // Store as array (will be JSON encoded)
+                    'label' => $label,
+                    'description' => $description
+                ]
+            );
+        }
+        
+        // For other settings, ensure value is an array
         if (!is_array($value)) {
             $value = [$value];
         }
@@ -60,5 +84,25 @@ class Setting extends Model
     public static function getArticleTypes()
     {
         return self::getValue('article_types', ['DIFFUSANT', 'TRANSPARENT', 'OPALINE']);
+    }
+
+    /**
+     * Get business name
+     */
+    public static function getBusinessName()
+    {
+        $value = self::getValue('business_name', ['']);
+        // Unwrap from array (stored as array due to cast)
+        return is_array($value) ? ($value[0] ?? '') : $value;
+    }
+
+    /**
+     * Get business logo path
+     */
+    public static function getBusinessLogo()
+    {
+        $value = self::getValue('business_logo', ['']);
+        // Unwrap from array (stored as array due to cast)
+        return is_array($value) ? ($value[0] ?? '') : $value;
     }
 }
