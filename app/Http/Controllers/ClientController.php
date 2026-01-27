@@ -32,6 +32,7 @@ class ClientController extends Controller
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'balance' => 'nullable|numeric|min:0',
         ]);
 
         $client = \App\Models\Client::create([
@@ -39,7 +40,7 @@ class ClientController extends Controller
             'email' => $validated['email'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
-            'balance' => 0,
+            'balance' => $validated['balance'] ?? 0,
         ]);
 
         return redirect()->route('clients.index')
@@ -76,6 +77,7 @@ class ClientController extends Controller
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'balance' => 'nullable|numeric|min:0',
         ]);
 
         $client->update([
@@ -83,6 +85,7 @@ class ClientController extends Controller
             'email' => $validated['email'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'address' => $validated['address'] ?? null,
+            'balance' => $validated['balance'] ?? $client->balance,
         ]);
 
         return redirect()->route('clients.index')

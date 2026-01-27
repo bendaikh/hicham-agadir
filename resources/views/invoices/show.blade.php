@@ -60,13 +60,17 @@
                             <p><strong>Date d'échéance:</strong> {{ $invoice->due_date ? $invoice->due_date->format('d/m/Y') : 'N/A' }}</p>
                             <p><strong>Statut:</strong> 
                                 <span class="px-3 py-1 rounded-full text-xs font-bold 
-                                    @if($invoice->status === 'paid') bg-green-100 text-green-700
-                                    @elseif($invoice->status === 'pending') bg-orange-100 text-orange-700
-                                    @else bg-red-100 text-red-700
+                                    @if($invoice->status === 'payee') bg-green-100 text-green-700
+                                    @elseif($invoice->status === 'envoyee') bg-blue-100 text-blue-700
+                                    @elseif($invoice->status === 'brouillon') bg-gray-100 text-gray-700
+                                    @elseif($invoice->status === 'annulee') bg-red-100 text-red-700
+                                    @else bg-gray-100 text-gray-700
                                     @endif">
-                                    @if($invoice->status === 'paid') Payée
-                                    @elseif($invoice->status === 'pending') En attente
-                                    @else En retard
+                                    @if($invoice->status === 'payee') Payée
+                                    @elseif($invoice->status === 'envoyee') Envoyée
+                                    @elseif($invoice->status === 'brouillon') Brouillon
+                                    @elseif($invoice->status === 'annulee') Annulée
+                                    @else {{ $invoice->status }}
                                     @endif
                                 </span>
                             </p>

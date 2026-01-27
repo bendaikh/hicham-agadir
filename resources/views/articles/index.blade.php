@@ -69,7 +69,9 @@
                         <th class="px-6 py-4 text-left">Dimensions</th>
                         <th class="px-6 py-4 text-center">Unité</th>
                         <th class="px-6 py-4 text-right">Prix Vente</th>
-                        <th class="px-6 py-4 text-center">Stock</th>
+                        <th class="px-6 py-4 text-center">Stock Total</th>
+                        <th class="px-6 py-4 text-center">Réservé</th>
+                        <th class="px-6 py-4 text-center">Disponible</th>
                         <th class="px-6 py-4 text-left">Actions</th>
                     </tr>
                 </thead>
@@ -120,6 +122,20 @@
                                     {{ $article->stock_quantity }}
                                 </span>
                             </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                    {{ $article->reserved_quantity ?? 0 }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                @php
+                                    $availableStock = ($article->stock_quantity ?? 0) - ($article->reserved_quantity ?? 0);
+                                    $availableClass = $availableStock <= 0 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700';
+                                @endphp
+                                <span class="px-3 py-1 rounded-full text-xs font-bold {{ $availableClass }}">
+                                    {{ max(0, $availableStock) }}
+                                </span>
+                            </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('articles.edit', $article) }}" class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
@@ -141,7 +157,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="10" class="px-6 py-12 text-center text-gray-500">
                                 <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>

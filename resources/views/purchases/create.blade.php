@@ -23,7 +23,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="supplier_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fournisseur *</label>
-                            <select name="supplier_id" id="supplier_id" required class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select name="supplier_id" id="supplier_id" required class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="">Sélectionner un fournisseur</option>
                                 @foreach (\App\Models\Supplier::orderBy('name')->get() as $supplier)
                                     <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
@@ -32,13 +32,13 @@
                         </div>
                         <div>
                             <label for="purchase_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date d'achat *</label>
-                            <input type="date" name="purchase_date" id="purchase_date" required value="{{ date('Y-m-d') }}" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="date" name="purchase_date" id="purchase_date" required value="{{ date('Y-m-d') }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                     </div>
 
                     <div class="mt-4">
                         <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes / Description</label>
-                        <textarea name="description" id="description" rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Notes additionnelles sur l'achat..."></textarea>
+                        <textarea name="description" id="description" rows="2" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Notes additionnelles sur l'achat..."></textarea>
                     </div>
                 </div>
 
@@ -62,7 +62,7 @@
                                     <!-- Article Select -->
                                     <div class="md:col-span-5">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Article *</label>
-                                        <select x-model="item.article_id" @change="updateArticleInfo(index)" required class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                        <select x-model="item.article_id" @change="updateArticleInfo(index)" required class="w-full border-2 border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
                                             <option value="">Sélectionner un article</option>
                                             @foreach (\App\Models\Article::where('is_active', true)->orderBy('designation')->get() as $article)
                                                 <option value="{{ $article->id }}" 
@@ -80,7 +80,7 @@
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Quantité *</label>
                                         <input type="number" x-model.number="item.quantity" @input="calculateItemTotal(index)" min="1" required 
-                                               class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
+                                               class="w-full border-2 border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white" 
                                                placeholder="Qté">
                                     </div>
 
@@ -88,14 +88,14 @@
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Prix d'achat (MAD) *</label>
                                         <input type="number" step="0.01" x-model.number="item.unit_price" @input="calculateItemTotal(index)" min="0" required 
-                                               class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
+                                               class="w-full border-2 border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white" 
                                                placeholder="0.00">
                                     </div>
 
                                     <!-- Total -->
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Total</label>
-                                        <div class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-100 font-bold text-gray-900" x-text="formatPrice(item.total)"></div>
+                                        <div class="w-full border-2 border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-gray-50 dark:bg-gray-600 font-bold text-gray-900 dark:border-gray-500 dark:text-white" x-text="formatPrice(item.total)"></div>
                                     </div>
 
                                     <!-- Remove Button -->

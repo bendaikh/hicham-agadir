@@ -20,7 +20,7 @@
                 Retour
             </a>
             <div class="flex items-center gap-3">
-                @if($quote->status === 'pending')
+                @if($quote->status !== 'rejected' && !$quote->invoice_id)
                     <form action="{{ route('quotes.convert-to-invoice', $quote) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir convertir ce devis en facture?');">
                         @csrf
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
@@ -30,6 +30,13 @@
                             Convertir en facture
                         </button>
                     </form>
+                @elseif($quote->invoice_id)
+                    <a href="{{ route('invoices.show', $quote->invoice_id) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Voir la facture
+                    </a>
                 @endif
                 <a href="{{ route('quotes.edit', $quote) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
                     <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

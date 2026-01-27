@@ -23,7 +23,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="client_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Client</label>
-                            <select name="client_id" id="client_id" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <select name="client_id" id="client_id" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="">Client comptoir</option>
                                 @foreach (\App\Models\Client::all() as $client)
                                     <option value="{{ $client->id }}">{{ $client->name }}</option>
@@ -33,13 +33,25 @@
 
                         <div>
                             <label for="quote_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">N° Devis *</label>
-                            <input type="text" name="quote_number" id="quote_number" required value="DEV-{{ str_pad(\App\Models\Quote::count() + 1, 6, '0', STR_PAD_LEFT) }}" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" name="quote_number" id="quote_number" required value="DEV-{{ str_pad(\App\Models\Quote::count() + 1, 6, '0', STR_PAD_LEFT) }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                     </div>
 
                     <div class="mt-4">
                         <label for="expires_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date d'expiration</label>
-                        <input type="date" name="expires_at" id="expires_at" value="{{ date('Y-m-d', strtotime('+30 days')) }}" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="date" name="expires_at" id="expires_at" value="{{ date('Y-m-d', strtotime('+30 days')) }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+
+                    <div class="mt-4">
+                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Statut *</label>
+                        <select name="status" id="status" required class="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="pending">En attente</option>
+                            <option value="rejected">Rejeté</option>
+                            <option value="expired">Expiré</option>
+                        </select>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            💡 Utilisez le bouton "Convertir en facture" pour créer une facture à partir de ce devis.
+                        </p>
                     </div>
                 </div>
 
@@ -63,15 +75,17 @@
                                     <!-- Article Select -->
                                     <div class="md:col-span-5">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Article *</label>
-                                        <select x-model="item.article_id" @change="updateArticleInfo(index)" required class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                        <select x-model="item.article_id" @change="updateArticleInfo(index)" required class="w-full border-2 border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
                                             <option value="">Sélectionner un article</option>
                                             @foreach (\App\Models\Article::where('is_active', true)->orderBy('designation')->get() as $article)
                                                 <option value="{{ $article->id }}" 
                                                         data-designation="{{ $article->full_designation }}"
                                                         data-unit="{{ $article->unit }}"
-                                                        data-price="{{ $article->selling_price }}">
+                                                        data-price="{{ $article->selling_price }}"
+                                                        data-stock="{{ $article->stock_quantity }}">
                                                     {{ $article->reference }} - {{ $article->designation }} 
                                                     @if($article->thickness) ({{ $article->thickness }}) @endif
+                                                    [Stock: {{ $article->stock_quantity }}]
                                                 </option>
                                             @endforeach
                                         </select>
@@ -81,7 +95,7 @@
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Quantité *</label>
                                         <input type="number" x-model.number="item.quantity" @input="calculateItemTotal(index)" min="1" required 
-                                               class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
+                                               class="w-full border-2 border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white" 
                                                placeholder="Qté">
                                     </div>
 
@@ -89,14 +103,14 @@
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Prix unitaire (MAD) *</label>
                                         <input type="number" step="0.01" x-model.number="item.unit_price" @input="calculateItemTotal(index)" min="0" required 
-                                               class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" 
+                                               class="w-full border-2 border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white" 
                                                placeholder="0.00">
                                     </div>
 
                                     <!-- Total -->
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-medium text-gray-500 mb-1">Total</label>
-                                        <div class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-gray-100 font-bold text-gray-900" x-text="formatPrice(item.total)"></div>
+                                        <div class="w-full border-2 border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-gray-50 font-bold text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white" x-text="formatPrice(item.total)"></div>
                                     </div>
 
                                     <!-- Remove Button -->
@@ -116,17 +130,17 @@
                     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
                         <div class="flex justify-end">
                             <div class="w-full md:w-80 space-y-3">
-                                <div class="flex justify-between text-sm text-gray-600">
+                                <div class="flex justify-between text-sm text-gray-700 dark:text-gray-300">
                                     <span>Sous-total:</span>
                                     <span x-text="formatPrice(subtotal)"></span>
                                 </div>
-                                <div class="flex justify-between text-sm text-gray-600">
+                                <div class="flex justify-between text-sm text-gray-700 dark:text-gray-300">
                                     <span>TVA (20%):</span>
                                     <span x-text="formatPrice(tax)"></span>
                                 </div>
-                                <div class="flex justify-between items-center pt-3 border-t-2 border-gray-200">
-                                    <span class="text-lg font-bold text-gray-900">Total:</span>
-                                    <span class="text-2xl font-bold text-blue-600" x-text="formatPrice(grandTotal)"></span>
+                                <div class="flex justify-between items-center pt-3 border-t-2 border-gray-300 dark:border-gray-600">
+                                    <span class="text-lg font-bold text-gray-900 dark:text-white">Total:</span>
+                                    <span class="text-2xl font-bold text-blue-600 dark:text-blue-400" x-text="formatPrice(grandTotal)"></span>
                                 </div>
                             </div>
                         </div>

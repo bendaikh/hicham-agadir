@@ -6,6 +6,7 @@ use App\Models\Quote;
 use App\Models\QuoteItem;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -42,6 +43,7 @@ class QuoteController extends Controller
             'client_id' => 'nullable|exists:clients,id',
             'quote_number' => 'required|string|unique:quotes,quote_number',
             'expires_at' => 'nullable|date',
+            'status' => 'required|in:pending,accepted,rejected,expired',
             'total_amount' => 'required|numeric|min:0',
             'items_json' => 'required|string',
         ])->validate();
@@ -60,7 +62,7 @@ class QuoteController extends Controller
                 'client_id' => $validated['client_id'],
                 'quote_number' => $validated['quote_number'],
                 'total_amount' => $validated['total_amount'],
-                'status' => 'pending',
+                'status' => $validated['status'],
                 'expires_at' => $validated['expires_at'] ?? now()->addDays(30),
             ]);
 
@@ -73,6 +75,12 @@ class QuoteController extends Controller
                     'unit_price' => $item['unit_price'],
                     'total_price' => $item['total_price'],
                 ]);
+            }
+
+            // If status is accepted, reserve stock
+            if ($validated['status'] === 'accepted') {
+                $quoteItems = $quote->fresh()->items;
+                StockService::reserveStock($quote->id, $quoteItems, $quote->quote_number);
             }
 
             DB::commit();
@@ -119,6 +127,7 @@ class QuoteController extends Controller
             'client_id' => 'nullable|exists:clients,id',
             'quote_number' => 'required|string|unique:quotes,quote_number,' . $quote->id,
             'expires_at' => 'nullable|date',
+            'status' => 'required|in:pending,rejected,expired',
             'total_amount' => 'required|numeric|min:0',
             'items_json' => 'required|string',
         ])->validate();
@@ -132,11 +141,15 @@ class QuoteController extends Controller
         try {
             DB::beginTransaction();
 
+            $oldStatus = $quote->status;
+            $newStatus = $validated['status'];
+
             // Update the quote
             $quote->update([
                 'client_id' => $validated['client_id'],
                 'quote_number' => $validated['quote_number'],
                 'total_amount' => $validated['total_amount'],
+                'status' => $newStatus,
                 'expires_at' => $validated['expires_at'],
             ]);
 
@@ -170,9 +183,25 @@ class QuoteController extends Controller
      */
     public function destroy(Quote $quote)
     {
-        $quote->delete();
-        return redirect()->route('quotes.index')
-            ->with('success', 'Devis supprimé avec succès!');
+        try {
+            DB::beginTransaction();
+
+            // If quote was accepted, release reserved stock
+            if ($quote->status === 'accepted') {
+                $quoteItems = $quote->items;
+                StockService::releaseReservedStock($quote->id, $quoteItems, $quote->quote_number);
+            }
+
+            $quote->delete();
+
+            DB::commit();
+
+            return redirect()->route('quotes.index')
+                ->with('success', 'Devis supprimé avec succès!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Erreur lors de la suppression: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -180,8 +209,31 @@ class QuoteController extends Controller
      */
     public function convertToInvoice(Quote $quote)
     {
+        // Can convert quotes with pending, accepted, or expired status
+        if (in_array($quote->status, ['rejected'])) {
+            return back()->withErrors(['error' => 'Impossible de convertir un devis refusé.']);
+        }
+
+        // Prevent converting the same quote twice
+        if ($quote->invoice_id) {
+            return back()->withErrors(['error' => 'Ce devis a déjà été converti en facture.']);
+        }
+
         try {
             DB::beginTransaction();
+
+            // Check stock availability first
+            $quoteItems = $quote->items;
+            $stockCheck = $quote->checkStockAvailability();
+            if (!$stockCheck['available']) {
+                DB::rollBack();
+                return back()->withErrors(['error' => $stockCheck['message']]);
+            }
+
+            // Reserve stock if not already reserved
+            if ($quote->status !== 'accepted') {
+                StockService::reserveStock($quote->id, $quoteItems, $quote->quote_number);
+            }
 
             // Generate invoice number
             $invoiceNumber = 'INV-' . str_pad(Invoice::count() + 1, 6, '0', STR_PAD_LEFT);
@@ -191,12 +243,13 @@ class QuoteController extends Controller
                 'client_id' => $quote->client_id,
                 'invoice_number' => $invoiceNumber,
                 'total_amount' => $quote->total_amount,
-                'status' => 'pending',
+                'status' => 'envoyee',
                 'due_date' => now()->addDays(30),
             ]);
 
-            // Copy items from quote to invoice
-            foreach ($quote->items as $quoteItem) {
+            // Copy items from quote to invoice and consume reserved stock
+            $quoteItems = $quote->items;
+            foreach ($quoteItems as $quoteItem) {
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,
                     'article_id' => $quoteItem->article_id,
@@ -206,13 +259,21 @@ class QuoteController extends Controller
                 ]);
             }
 
-            // Update quote status to accepted
-            $quote->update(['status' => 'accepted']);
+            // Consume reserved stock (moves from 'reserved' to 'out')
+            StockService::consumeReservedStock(
+                $quote->id,
+                $invoice->id,
+                $quote->quote_number,
+                $invoiceNumber
+            );
+
+            // Update quote to link with invoice
+            $quote->update(['invoice_id' => $invoice->id]);
 
             DB::commit();
 
             return redirect()->route('invoices.show', $invoice)
-                ->with('success', 'Devis converti en facture avec succès!');
+                ->with('success', 'Devis converti en facture avec succès! Stock mis à jour.');
 
         } catch (\Exception $e) {
             DB::rollBack();

@@ -32,7 +32,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom de l'Entreprise</label>
                         <input type="text" name="business_name" value="{{ \App\Models\Setting::getBusinessName() }}" 
-                               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               class="w-full border-2 border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                placeholder="Nom de votre entreprise">
                     </div>
 
@@ -53,7 +53,7 @@
                             
                             <div class="flex-1">
                                 <input type="file" name="business_logo" accept="image/*" 
-                                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                       class="w-full border-2 border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <p class="text-xs text-gray-500 mt-1">Formats acceptés: JPG, PNG, GIF (max 2MB)</p>
                                 @if($logoUrl)
                                     <label class="inline-flex items-center mt-2">
@@ -89,7 +89,7 @@
                     @foreach ($categories as $index => $category)
                         <div class="flex items-center gap-3 category-item">
                             <input type="text" name="categories[]" value="{{ $category }}" required
-                                   class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   class="flex-1 border-2 border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                    placeholder="Nom de la catégorie">
                             <button type="button" onclick="removeCategory(this)" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,7 +129,7 @@
                     @foreach ($types as $index => $type)
                         <div class="flex items-center gap-3 type-item">
                             <input type="text" name="types[]" value="{{ $type }}" required
-                                   class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   class="flex-1 border-2 border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                    placeholder="Nom du type">
                             <button type="button" onclick="removeType(this)" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -162,7 +162,7 @@
             newItem.className = 'flex items-center gap-3 category-item';
             newItem.innerHTML = `
                 <input type="text" name="categories[]" value="" required
-                       class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       class="flex-1 border-2 border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                        placeholder="Nom de la catégorie">
                 <button type="button" onclick="removeCategory(this)" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,7 +188,7 @@
             newItem.className = 'flex items-center gap-3 type-item';
             newItem.innerHTML = `
                 <input type="text" name="types[]" value="" required
-                       class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       class="flex-1 border-2 border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                        placeholder="Nom du type">
                 <button type="button" onclick="removeType(this)" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -80,20 +80,26 @@
                         <td class="px-6 py-4 font-bold text-gray-900 dark:text-gray-100">{{ number_format($quote->total_amount, 2, ',', '.') }} MAD</td>
                         <td class="px-6 py-4">
                             @php
-                                $statusClasses = match($quote->status) {
-                                    'accepted' => 'bg-green-100 text-green-700',
-                                    'pending' => 'bg-orange-100 text-orange-700',
-                                    'rejected' => 'bg-red-100 text-red-700',
-                                    'expired' => 'bg-gray-100 text-gray-700',
-                                    default => 'bg-gray-100 text-gray-700'
-                                };
-                                $statusLabel = match($quote->status) {
-                                    'accepted' => 'Accepté',
-                                    'pending' => 'En attente',
-                                    'rejected' => 'Refusé',
-                                    'expired' => 'Expiré',
-                                    default => $quote->status
-                                };
+                                // If quote has been converted to invoice, show "Convertie" status
+                                if ($quote->invoice_id) {
+                                    $statusClasses = 'bg-blue-100 text-blue-700';
+                                    $statusLabel = 'Convertie';
+                                } else {
+                                    $statusClasses = match($quote->status) {
+                                        'accepted' => 'bg-green-100 text-green-700',
+                                        'pending' => 'bg-orange-100 text-orange-700',
+                                        'rejected' => 'bg-red-100 text-red-700',
+                                        'expired' => 'bg-gray-100 text-gray-700',
+                                        default => 'bg-gray-100 text-gray-700'
+                                    };
+                                    $statusLabel = match($quote->status) {
+                                        'accepted' => 'Accepté',
+                                        'pending' => 'En attente',
+                                        'rejected' => 'Refusé',
+                                        'expired' => 'Expiré',
+                                        default => $quote->status
+                                    };
+                                }
                             @endphp
                             <span class="px-3 py-1 rounded-full text-xs font-bold {{ $statusClasses }}">
                                 {{ $statusLabel }}

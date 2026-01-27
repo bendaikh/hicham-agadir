@@ -42,11 +42,12 @@ class ArticleController extends Controller
             'selling_price' => 'required|numeric|min:0',
             'price_per_unit' => 'nullable|numeric|min:0',
             'surface_area' => 'nullable|numeric|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
             'min_stock' => 'nullable|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $validated['stock_quantity'] = 0;
+        $validated['stock_quantity'] = $validated['stock_quantity'] ?? 0;
         $validated['is_active'] = true;
 
         // Handle image upload
@@ -94,6 +95,7 @@ class ArticleController extends Controller
             'selling_price' => 'required|numeric|min:0',
             'price_per_unit' => 'nullable|numeric|min:0',
             'surface_area' => 'nullable|numeric|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
             'min_stock' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',

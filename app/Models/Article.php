@@ -19,6 +19,7 @@ class Article extends Model
         'price_per_unit',
         'surface_area',
         'stock_quantity',
+        'reserved_quantity',
         'min_stock',
         'is_active',
         'image'
@@ -34,6 +35,11 @@ class Article extends Model
     public function purchaseItems()
     {
         return $this->hasMany(PurchaseItem::class);
+    }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class);
     }
 
     /**
@@ -99,5 +105,13 @@ class Article extends Model
             return asset('storage/' . $this->image);
         }
         return null;
+    }
+
+    /**
+     * Get available stock (stock_quantity - reserved_quantity)
+     */
+    public function getAvailableStockAttribute(): int
+    {
+        return max(0, $this->stock_quantity - $this->reserved_quantity);
     }
 }

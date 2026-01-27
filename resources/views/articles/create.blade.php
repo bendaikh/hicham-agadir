@@ -21,7 +21,7 @@
                     <div>
                         <label for="reference" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Référence *</label>
                         <input type="text" name="reference" id="reference" required value="{{ old('reference') }}" 
-                               class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('reference') border-red-500 @enderror" 
+                               class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('reference') border-red-500 @enderror" 
                                placeholder="Ex: 100.27000">
                         @error('reference')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -29,7 +29,7 @@
                     </div>
                     <div>
                         <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Catégorie</label>
-                        <select name="category" id="category" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select name="category" id="category" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="">Sélectionner une catégorie</option>
                             @foreach (\App\Models\Setting::getArticleCategories() as $cat)
                                 <option value="{{ $cat }}" {{ old('category') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
@@ -41,7 +41,7 @@
                 <div>
                     <label for="designation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Désignation *</label>
                     <input type="text" name="designation" id="designation" required value="{{ old('designation') }}" 
-                           class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                           class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                            placeholder="Ex: PMMA COULE ALTUGLAS">
                     @error('designation')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -52,7 +52,7 @@
                 <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type</label>
-                        <select name="type" id="type" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select name="type" id="type" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <option value="">Sélectionner</option>
                             @foreach (\App\Models\Setting::getArticleTypes() as $type)
                                 <option value="{{ $type }}" {{ old('type') == $type ? 'selected' : '' }}>{{ $type }}</option>
@@ -62,13 +62,13 @@
                     <div>
                         <label for="color" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Couleur</label>
                         <input type="text" name="color" id="color" value="{{ old('color') }}" 
-                               class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                               class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                                placeholder="Ex: BLANC">
                     </div>
                     <div>
                         <label for="thickness" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Épaisseur</label>
                         <input type="text" name="thickness" id="thickness" value="{{ old('thickness') }}" 
-                               class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                               class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                                placeholder="Ex: 3MM">
                     </div>
                 </div>
@@ -77,25 +77,25 @@
                     <div>
                         <label for="dimensions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Dimensions</label>
                         <input type="text" name="dimensions" id="dimensions" value="{{ old('dimensions') }}" 
-                               class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                               class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                                placeholder="Ex: 3X2M">
                     </div>
                     <div>
                         <label for="surface_area" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Surface (M²)</label>
                         <input type="number" step="0.0001" name="surface_area" id="surface_area" value="{{ old('surface_area') }}" 
-                               class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                               class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                                placeholder="Ex: 6.19">
                     </div>
                 </div>
 
                 <!-- Pricing -->
-                <div class="border-t border-gray-100 pt-6">
+                <div class="border-t border-gray-300 dark:border-gray-600 pt-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Tarification</h3>
                     
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label for="unit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Unité de vente *</label>
-                            <select name="unit" id="unit" required class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select name="unit" id="unit" required class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="Plaque" {{ old('unit', 'Plaque') == 'Plaque' ? 'selected' : '' }}>Plaque</option>
                                 <option value="M²" {{ old('unit') == 'M²' ? 'selected' : '' }}>M²</option>
                                 <option value="ml" {{ old('unit') == 'ml' ? 'selected' : '' }}>ml (mètre linéaire)</option>
@@ -105,7 +105,7 @@
                         <div>
                             <label for="selling_price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prix de vente (MAD) *</label>
                             <input type="number" step="0.01" name="selling_price" id="selling_price" required value="{{ old('selling_price') }}" 
-                                   class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                   class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                                    placeholder="0.00">
                             @error('selling_price')
                                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -114,14 +114,14 @@
                         <div>
                             <label for="price_per_unit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prix / M² (MAD)</label>
                             <input type="number" step="0.01" name="price_per_unit" id="price_per_unit" value="{{ old('price_per_unit') }}" 
-                                   class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                   class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                                    placeholder="0.00">
                         </div>
                     </div>
                 </div>
 
                 <!-- Image Upload -->
-                <div class="border-t border-gray-100 pt-6">
+                <div class="border-t border-gray-300 dark:border-gray-600 pt-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Image du Produit</h3>
                     
                     <div>
@@ -146,28 +146,26 @@
                 </div>
 
                 <!-- Stock -->
-                <div class="border-t border-gray-100 pt-6">
+                <div class="border-t border-gray-300 dark:border-gray-600 pt-6">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Gestion du Stock</h3>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="min_stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stock minimum (alerte)</label>
-                            <input type="number" name="min_stock" id="min_stock" value="{{ old('min_stock', 0) }}" 
-                                   class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            <label for="stock_quantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stock actuel *</label>
+                            <input type="number" name="stock_quantity" id="stock_quantity" value="{{ old('stock_quantity', 0) }}" required
+                                   class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                                    placeholder="0">
                         </div>
-                        <div class="flex items-end">
-                            <div class="bg-blue-50 text-blue-700 p-4 rounded-xl text-sm w-full">
-                                <svg class="w-5 h-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Le stock sera mis à jour lors des achats
-                            </div>
+                        <div>
+                            <label for="min_stock" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stock minimum (alerte)</label>
+                            <input type="number" name="min_stock" id="min_stock" value="{{ old('min_stock', 0) }}" 
+                                   class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
+                                   placeholder="0">
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-300 dark:border-gray-600">
                     <a href="{{ route('articles.index') }}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-200 transition">
                         Annuler
                     </a>

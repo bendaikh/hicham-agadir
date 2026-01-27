@@ -28,7 +28,7 @@
                 
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom du fournisseur *</label>
-                    <input type="text" name="name" id="name" required value="{{ old('name') }}" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('name') border-red-500 @enderror" placeholder="Nom du fournisseur">
+                    <input type="text" name="name" id="name" required value="{{ old('name') }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('name') border-red-500 @enderror" placeholder="Nom du fournisseur">
                     @error('name')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror
@@ -37,20 +37,20 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('email') border-red-500 @enderror" placeholder="email@exemple.com">
+                        <input type="email" name="email" id="email" value="{{ old('email') }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('email') border-red-500 @enderror" placeholder="email@exemple.com">
                         @error('email')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Téléphone</label>
-                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="+212 6XX XXX XXX">
+                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="+212 6XX XXX XXX">
                     </div>
                 </div>
 
                 <div>
                     <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Adresse</label>
-                    <textarea name="address" id="address" rows="3" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Adresse complète du fournisseur">{{ old('address') }}</textarea>
+                    <textarea name="address" id="address" rows="3" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Adresse complète du fournisseur">{{ old('address') }}</textarea>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">

@@ -20,15 +20,19 @@
         </div>
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
             <div class="text-sm text-gray-500 mb-1">Factures Payées</div>
-            <div class="text-2xl font-bold text-green-600">{{ \App\Models\Invoice::where('status', 'paid')->count() }}</div>
+            <div class="text-2xl font-bold text-green-600">{{ \App\Models\Invoice::where('status', 'payee')->count() }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="text-sm text-gray-500 mb-1">En attente</div>
-            <div class="text-2xl font-bold text-orange-600">{{ \App\Models\Invoice::where('status', 'pending')->count() }}</div>
+            <div class="text-sm text-gray-500 mb-1">Envoyées</div>
+            <div class="text-2xl font-bold text-blue-600">{{ \App\Models\Invoice::where('status', 'envoyee')->count() }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-            <div class="text-sm text-gray-500 mb-1">En retard</div>
-            <div class="text-2xl font-bold text-red-600">{{ \App\Models\Invoice::where('status', 'overdue')->count() }}</div>
+            <div class="text-sm text-gray-500 mb-1">Brouillons</div>
+            <div class="text-2xl font-bold text-gray-600">{{ \App\Models\Invoice::where('status', 'brouillon')->count() }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="text-sm text-gray-500 mb-1">Annulées</div>
+            <div class="text-2xl font-bold text-red-600">{{ \App\Models\Invoice::where('status', 'annulee')->count() }}</div>
         </div>
     </div>
 
@@ -46,9 +50,10 @@
             <div class="flex items-center gap-2">
                 <select class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Tous les statuts</option>
-                    <option value="paid">Payée</option>
-                    <option value="pending">En attente</option>
-                    <option value="overdue">En retard</option>
+                    <option value="payee">Payée</option>
+                    <option value="envoyee">Envoyée</option>
+                    <option value="brouillon">Brouillon</option>
+                    <option value="annulee">Annulée</option>
                 </select>
             </div>
         </div>
@@ -73,15 +78,17 @@
                         <td class="px-6 py-4">
                             @php
                                 $statusClasses = match($invoice->status) {
-                                    'paid' => 'bg-green-100 text-green-700',
-                                    'pending' => 'bg-orange-100 text-orange-700',
-                                    'overdue' => 'bg-red-100 text-red-700',
+                                    'payee' => 'bg-green-100 text-green-700',
+                                    'envoyee' => 'bg-blue-100 text-blue-700',
+                                    'brouillon' => 'bg-gray-100 text-gray-700',
+                                    'annulee' => 'bg-red-100 text-red-700',
                                     default => 'bg-gray-100 text-gray-700'
                                 };
                                 $statusLabel = match($invoice->status) {
-                                    'paid' => 'Payée',
-                                    'pending' => 'En attente',
-                                    'overdue' => 'En retard',
+                                    'payee' => 'Payée',
+                                    'envoyee' => 'Envoyée',
+                                    'brouillon' => 'Brouillon',
+                                    'annulee' => 'Annulée',
                                     default => $invoice->status
                                 };
                             @endphp

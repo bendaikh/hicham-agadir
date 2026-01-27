@@ -159,11 +159,11 @@
                 <div>
                     <div class="flex justify-between text-sm mb-2">
                         <span class="text-gray-500">Factures payées</span>
-                        <span class="font-bold text-gray-900 dark:text-gray-100">{{ \App\Models\Invoice::where('status', 'paid')->count() }}/{{ \App\Models\Invoice::count() }}</span>
+                        <span class="font-bold text-gray-900 dark:text-gray-100">{{ \App\Models\Invoice::where('status', 'payee')->count() }}/{{ \App\Models\Invoice::count() }}</span>
                     </div>
                     @php
                         $totalInv = \App\Models\Invoice::count();
-                        $paidInv = \App\Models\Invoice::where('status', 'paid')->count();
+                        $paidInv = \App\Models\Invoice::where('status', 'payee')->count();
                         $paidPercent = $totalInv > 0 ? round(($paidInv / $totalInv) * 100) : 0;
                     @endphp
                     <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
