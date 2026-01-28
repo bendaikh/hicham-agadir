@@ -61,18 +61,22 @@
     </div>
 
     <!-- Payments Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden" x-data="paymentsManager()">
         <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="relative">
-                    <input type="text" placeholder="Rechercher une transaction..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex items-center gap-4 flex-1">
+                <div class="relative flex-1 max-w-xs">
+                    <input type="text" 
+                           x-model="searchQuery" 
+                           @input="filterPayments()"
+                           placeholder="Rechercher une transaction..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <select class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select x-model="filterMethod" @change="filterPayments()" class="border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Toutes les méthodes</option>
                     <option value="cash">Espèces</option>
                     <option value="card">Carte bancaire</option>
@@ -93,8 +97,10 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                @forelse (\App\Models\Payment::latest()->take(10)->get() as $payment)
-                    <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                @forelse (\App\Models\Payment::latest()->get() as $payment)
+                    <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 payment-row"
+                        data-type="{{ strtolower(class_basename($payment->payable_type)) }}"
+                        data-method="{{ strtolower($payment->payment_method) }}">
                         <td class="px-6 py-4 font-bold text-blue-600">#PAY-{{ str_pad($payment->id, 4, '0', STR_PAD_LEFT) }}</td>
                         <td class="px-6 py-4 text-gray-900 dark:text-gray-100">
                             {{ class_basename($payment->payable_type) }}
@@ -123,7 +129,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('payments.show', $payment) }}" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg inline-block">
+                            <a href="{{ route('payments.show', $payment) }}" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition inline-block">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -144,4 +150,41 @@
             </tbody>
         </table>
     </div>
+
+    <script>
+        function paymentsManager() {
+            return {
+                searchQuery: '',
+                filterMethod: '',
+                
+                filterPayments() {
+                    const rows = document.querySelectorAll('.payment-row');
+                    
+                    rows.forEach(row => {
+                        let show = true;
+                        
+                        // Search filter
+                        if (this.searchQuery) {
+                            const searchLower = this.searchQuery.toLowerCase();
+                            const type = row.dataset.type;
+                            
+                            if (!type.includes(searchLower)) {
+                                show = false;
+                            }
+                        }
+                        
+                        // Method filter
+                        if (this.filterMethod && show) {
+                            const method = row.dataset.method;
+                            if (method !== this.filterMethod) {
+                                show = false;
+                            }
+                        }
+                        
+                        row.style.display = show ? '' : 'none';
+                    });
+                }
+            };
+        }
+    </script>
 </x-app-layout>

@@ -87,7 +87,8 @@ class SettingController extends Controller
             $logoPath = $logo->store('business', 'public');
             
             // Delete old logo if exists
-            $oldLogo = Setting::getValue('business_logo', '');
+            $oldLogoValue = Setting::getValue('business_logo', '');
+            $oldLogo = is_array($oldLogoValue) ? ($oldLogoValue[0] ?? '') : $oldLogoValue;
             if ($oldLogo && \Storage::disk('public')->exists($oldLogo)) {
                 \Storage::disk('public')->delete($oldLogo);
             }
@@ -100,7 +101,8 @@ class SettingController extends Controller
             );
         } elseif ($request->has('remove_logo') && $request->remove_logo) {
             // Remove logo
-            $oldLogo = Setting::getValue('business_logo', '');
+            $oldLogoValue = Setting::getValue('business_logo', '');
+            $oldLogo = is_array($oldLogoValue) ? ($oldLogoValue[0] ?? '') : $oldLogoValue;
             if ($oldLogo && \Storage::disk('public')->exists($oldLogo)) {
                 \Storage::disk('public')->delete($oldLogo);
             }

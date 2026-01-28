@@ -2,8 +2,8 @@
     <div class="max-w-2xl mx-auto">
         <div class="flex items-center justify-between mb-8">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Nouveau Fournisseur</h1>
-                <p class="text-gray-500">Ajouter un nouveau fournisseur</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Modifier Fournisseur</h1>
+                <p class="text-gray-500">Mettre à jour les informations du fournisseur</p>
             </div>
             <a href="{{ route('suppliers.index') }}" class="text-gray-500 hover:text-gray-700">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,12 +23,13 @@
                 </div>
             @endif
 
-            <form action="{{ route('suppliers.store') }}" method="POST" class="space-y-6">
+            <form action="{{ route('suppliers.update', $supplier) }}" method="POST" class="space-y-6">
                 @csrf
+                @method('PUT')
                 
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom du fournisseur *</label>
-                    <input type="text" name="name" id="name" required value="{{ old('name') }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('name') border-red-500 @enderror" placeholder="Nom du fournisseur">
+                    <input type="text" name="name" id="name" required value="{{ old('name', $supplier->name) }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('name') border-red-500 @enderror" placeholder="Nom du fournisseur">
                     @error('name')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror
@@ -37,25 +38,25 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('email') border-red-500 @enderror" placeholder="email@exemple.com">
+                        <input type="email" name="email" id="email" value="{{ old('email', $supplier->email) }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('email') border-red-500 @enderror" placeholder="email@exemple.com">
                         @error('email')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Téléphone</label>
-                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="+212 6XX XXX XXX">
+                        <input type="text" name="phone" id="phone" value="{{ old('phone', $supplier->phone) }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="+212 6XX XXX XXX">
                     </div>
                 </div>
 
                 <div>
                     <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Adresse</label>
-                    <textarea name="address" id="address" rows="3" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Adresse complète du fournisseur">{{ old('address') }}</textarea>
+                    <textarea name="address" id="address" rows="3" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Adresse complète du fournisseur">{{ old('address', $supplier->address) }}</textarea>
                 </div>
 
                 <div>
                     <label for="balance" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Solde (MAD)</label>
-                    <input type="number" name="balance" id="balance" step="0.01" value="{{ old('balance', 0) }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('balance') border-red-500 @enderror" placeholder="0.00">
+                    <input type="number" name="balance" id="balance" step="0.01" value="{{ old('balance', $supplier->balance) }}" class="w-full border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white @error('balance') border-red-500 @enderror" placeholder="0.00">
                     @error('balance')
                         <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                     @enderror
@@ -66,7 +67,7 @@
                         Annuler
                     </a>
                     <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition">
-                        Enregistrer le fournisseur
+                        Enregistrer les modifications
                     </button>
                 </div>
             </form>

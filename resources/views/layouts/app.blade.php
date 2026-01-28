@@ -35,7 +35,7 @@
                         </button>
 
                         <!-- Search Bar -->
-                        <div class="flex-1 max-w-xl mx-4 hidden sm:block">
+                        <div class="flex-1 max-w-xl mx-4 hidden sm:block" x-data="globalSearch()">
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -43,8 +43,112 @@
                                     </svg>
                                 </div>
                                 <input type="search" 
+                                       x-model="query"
+                                       @input="search()"
+                                       @keydown.escape="open = false"
+                                       @keydown.arrow-down="focusNext()"
+                                       @keydown.arrow-up="focusPrev()"
+                                       @keydown.enter="selectFocused()"
                                        class="block w-full bg-slate-100 dark:bg-slate-700/50 border-0 rounded-xl py-3 pl-12 pr-4 text-sm text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all" 
                                        placeholder="Rechercher des profils, factures ou commandes...">
+                                
+                                <!-- Search Results Dropdown -->
+                                <div x-show="open && results.total > 0" 
+                                     @click.outside="open = false"
+                                     class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 max-h-96 overflow-y-auto z-50">
+                                    
+                                    <!-- Clients Results -->
+                                    <template x-if="results.clients && results.clients.length > 0">
+                                        <div>
+                                            <div class="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+                                                👥 Clients
+                                            </div>
+                                            <template x-for="(client, idx) in results.clients" :key="'client-' + idx">
+                                                <a :href="client.url" 
+                                                   class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
+                                                    <div class="font-medium text-slate-900 dark:text-white text-sm" x-text="client.name"></div>
+                                                    <div class="text-xs text-slate-500 dark:text-slate-400" x-text="client.email"></div>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Articles Results -->
+                                    <template x-if="results.articles && results.articles.length > 0">
+                                        <div>
+                                            <div class="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+                                                📦 Articles
+                                            </div>
+                                            <template x-for="(article, idx) in results.articles" :key="'article-' + idx">
+                                                <a :href="article.url" 
+                                                   class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
+                                                    <div class="font-medium text-slate-900 dark:text-white text-sm" x-text="article.name"></div>
+                                                    <div class="text-xs text-slate-500 dark:text-slate-400" x-text="article.reference + ' • ' + article.price + ' MAD'"></div>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Quotes Results -->
+                                    <template x-if="results.quotes && results.quotes.length > 0">
+                                        <div>
+                                            <div class="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+                                                📄 Devis
+                                            </div>
+                                            <template x-for="(quote, idx) in results.quotes" :key="'quote-' + idx">
+                                                <a :href="quote.url" 
+                                                   class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
+                                                    <div class="font-medium text-slate-900 dark:text-white text-sm" x-text="quote.name"></div>
+                                                    <div class="text-xs text-slate-500 dark:text-slate-400" x-text="quote.client + ' • ' + quote.status"></div>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Invoices Results -->
+                                    <template x-if="results.invoices && results.invoices.length > 0">
+                                        <div>
+                                            <div class="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+                                                🧾 Factures
+                                            </div>
+                                            <template x-for="(invoice, idx) in results.invoices" :key="'invoice-' + idx">
+                                                <a :href="invoice.url" 
+                                                   class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
+                                                    <div class="font-medium text-slate-900 dark:text-white text-sm" x-text="invoice.name"></div>
+                                                    <div class="text-xs text-slate-500 dark:text-slate-400" x-text="invoice.client + ' • ' + invoice.status"></div>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Purchases Results -->
+                                    <template x-if="results.purchases && results.purchases.length > 0">
+                                        <div>
+                                            <div class="px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+                                                🛒 Achats
+                                            </div>
+                                            <template x-for="(purchase, idx) in results.purchases" :key="'purchase-' + idx">
+                                                <a :href="purchase.url" 
+                                                   class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
+                                                    <div class="font-medium text-slate-900 dark:text-white text-sm" x-text="purchase.name"></div>
+                                                    <div class="text-xs text-slate-500 dark:text-slate-400" x-text="purchase.supplier + ' • ' + purchase.status"></div>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                                
+                                <!-- No Results Message -->
+                                <div x-show="open && loading === false && results.total === 0 && query.length >= 2" 
+                                     class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-4 z-50">
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 text-center">Aucun résultat trouvé pour "<span x-text="query"></span>"</p>
+                                </div>
+                                
+                                <!-- Loading State -->
+                                <div x-show="open && loading" 
+                                     class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-4 z-50">
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 text-center">Recherche en cours...</p>
+                                </div>
                             </div>
                         </div>
 

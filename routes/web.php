@@ -9,6 +9,8 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ReportsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,8 +19,10 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
     
     Route::resource('clients', ClientController::class);
+    Route::get('/clients/export/csv', [ClientController::class, 'export'])->name('clients.export');
     Route::resource('suppliers', SupplierController::class);
     Route::resource('articles', ArticleController::class);
     Route::resource('purchases', PurchaseController::class);
@@ -42,9 +46,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/pos/checkout', [\App\Http\Controllers\PosController::class, 'checkout'])->name('pos.checkout');
     Route::post('/pos/pending', [\App\Http\Controllers\PosController::class, 'savePending'])->name('pos.pending');
     
-    Route::get('/reports', function () {
-        return view('reports.index');
-    })->name('reports.index');
+    Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [ReportsController::class, 'export'])->name('reports.export');
 });
 
 Route::middleware('auth')->group(function () {

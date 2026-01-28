@@ -103,4 +103,35 @@ class ClientController extends Controller
         return redirect()->route('clients.index')
             ->with('success', 'Client supprimé avec succès!');
     }
+
+    /**
+     * Export clients to CSV
+     */
+    public function export()
+    {
+        $clients = \App\Models\Client::latest()->get();
+        
+        $csvHeader = array('Nom', 'Email', 'Téléphone', 'Adresse', 'Solde', 'Créé le');
+        
+        $handle = fopen('php://output', 'w');
+        
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename=clients_' . date('Y-m-d') . '.csv');
+        
+        fputcsv($handle, $csvHeader);
+        
+        foreach ($clients as $client) {
+            fputcsv($handle, [
+                $client->name,
+                $client->email ?? '',
+                $client->phone ?? '',
+                $client->address ?? '',
+                number_format($client->balance, 2),
+                $client->created_at->format('d/m/Y'),
+            ]);
+        }
+        
+        fclose($handle);
+        exit;
+    }
 }

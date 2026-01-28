@@ -1,4 +1,25 @@
 <x-app-layout>
+    <!-- Period Selection -->
+    <div class="flex items-center justify-between mb-8" x-data="dashboardManager()" x-init="init()" :class="{ 'opacity-50': isLoading }">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Tableau de bord</h1>
+            <p class="text-gray-500">Vue d'ensemble de votre entreprise</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <select x-model="selectedPeriod" @change="updatePeriod()" :disabled="isLoading" class="border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                <option value="month">Ce mois</option>
+                <option value="quarter">Ce trimestre</option>
+                <option value="year">Cette année</option>
+                <option value="custom">Personnalisé</option>
+            </select>
+            <div x-show="selectedPeriod === 'custom'" class="flex items-center gap-2" style="display: none;">
+                <input type="date" x-model="startDate" @change="updatePeriod()" class="border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <span class="text-gray-400">à</span>
+                <input type="date" x-model="endDate" @change="updatePeriod()" class="border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <!-- Card: Total Sales -->
@@ -98,14 +119,19 @@
             </div>
             <!-- Chart -->
             <div class="h-48 sm:h-64 flex items-end justify-between px-2 sm:px-4 pb-8">
-                @for ($i = 1; $i <= 6; $i++)
-                    <div class="w-8 sm:w-12 bg-gradient-to-t from-blue-500/10 to-cyan-500/20 rounded-t-lg relative group hover:from-blue-500/20 hover:to-cyan-500/30 transition-all cursor-pointer" style="height: {{ rand(30, 90) }}%">
+                @php
+                    $maxSales = max($salesData) ?: 1;
+                @endphp
+                @foreach($monthLabels as $index => $month)
+                    <div class="w-8 sm:w-12 bg-gradient-to-t from-blue-500/10 to-cyan-500/20 rounded-t-lg relative group hover:from-blue-500/20 hover:to-cyan-500/30 transition-all cursor-pointer" 
+                         style="height: {{ ($salesData[$index] / $maxSales) * 100 }}%"
+                         title="{{ number_format($salesData[$index], 0, ',', '.') }} MAD">
                         <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full"></div>
                         <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs text-gray-400 uppercase font-medium">
-                            {{ ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUN'][$i-1] }}
+                            {{ $month }}
                         </div>
                     </div>
-                @endfor
+                @endforeach
             </div>
         </div>
 
@@ -243,3 +269,66 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    function dashboardManager() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        return {
+            selectedPeriod: 'month',
+            startDate: firstDay.toISOString().split('T')[0],
+            endDate: today.toISOString().split('T')[0],
+            isLoading: false,
+            
+            init() {
+                // Get current period from URL if exists
+                const params = new URLSearchParams(window.location.search);
+                const period = params.get('period');
+                if (period) {
+                    this.selectedPeriod = period;
+                    
+                    // Restore custom dates if provided
+                    if (period === 'custom') {
+                        const startDate = params.get('start_date');
+                        const endDate = params.get('end_date');
+                        if (startDate) this.startDate = startDate;
+                        if (endDate) this.endDate = endDate;
+                    }
+                }
+            },
+            
+            updatePeriod() {
+                if (this.isLoading) return; // Prevent multiple clicks
+                
+                // Validate custom dates
+                if (this.selectedPeriod === 'custom') {
+                    if (!this.startDate || !this.endDate) {
+                        alert('Veuillez sélectionner une date de début et de fin');
+                        return;
+                    }
+                    if (new Date(this.startDate) > new Date(this.endDate)) {
+                        alert('La date de début doit être avant la date de fin');
+                        return;
+                    }
+                }
+                
+                // Show loading state
+                this.isLoading = true;
+                
+                // Add slight delay to show transition
+                setTimeout(() => {
+                    const params = new URLSearchParams();
+                    params.set('period', this.selectedPeriod);
+                    
+                    if (this.selectedPeriod === 'custom') {
+                        params.set('start_date', this.startDate);
+                        params.set('end_date', this.endDate);
+                    }
+                    
+                    window.location.href = `/dashboard?${params.toString()}`;
+                }, 200);
+            }
+        };
+    }
+</script>

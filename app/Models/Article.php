@@ -37,6 +37,11 @@ class Article extends Model
         return $this->hasMany(PurchaseItem::class);
     }
 
+    public function invoiceItems()
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
     public function stockMovements()
     {
         return $this->hasMany(StockMovement::class);

@@ -39,24 +39,55 @@
     </div>
 
     <!-- Articles Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden" x-data="articlesManager()">
         <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="relative">
-                    <input type="text" placeholder="Rechercher un article..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex items-center gap-4 flex-1">
+                <div class="relative flex-1 max-w-xs">
+                    <input type="text" 
+                           x-model="searchQuery" 
+                           @input="filterArticles()"
+                           placeholder="Rechercher un article..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <select class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select x-model="filterCategory" @change="filterArticles()" class="border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Toutes catégories</option>
                     <option value="PMMA">PMMA</option>
                     <option value="Vitrage">Vitrage</option>
                     <option value="Profilé">Profilé</option>
                     <option value="Accessoire">Accessoire</option>
                 </select>
+                <div class="relative">
+                    <button @click="showFilter = !showFilter" 
+                            class="px-3 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Filter Dropdown -->
+                    <div x-show="showFilter" 
+                         @click.outside="showFilter = false"
+                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-20">
+                        <div class="p-4 space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 mb-2">Stock</label>
+                                <select @change="filterArticles()" 
+                                        x-model="filterStock"
+                                        class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded text-sm">
+                                    <option value="">Tous</option>
+                                    <option value="low">Faible stock</option>
+                                    <option value="available">En stock</option>
+                                    <option value="out">Rupture</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -76,8 +107,12 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @forelse ($articles as $article)
-                        <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                    @forelse (\App\Models\Article::latest()->get() as $article)
+                        <tr class="text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30 article-row"
+                            data-reference="{{ strtolower($article->reference) }}"
+                            data-designation="{{ strtolower($article->designation) }}"
+                            data-category="{{ strtolower($article->category ?? '') }}"
+                            data-stock="{{ $article->stock_quantity }}">
                             <td class="px-6 py-4">
                                 @if($article->image)
                                     <img src="{{ $article->image_url }}" alt="{{ $article->designation }}" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
@@ -138,7 +173,13 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ route('articles.edit', $article) }}" class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
+                                    <a href="{{ route('articles.show', $article) }}" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </a>
+                                    <a href="{{ route('articles.edit', $article) }}" class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
@@ -146,7 +187,7 @@
                                     <form action="{{ route('articles.destroy', $article) }}" method="POST" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                                        <button type="submit" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
@@ -168,11 +209,54 @@
                 </tbody>
             </table>
         </div>
-        
-        @if($articles->hasPages())
-            <div class="p-4 border-t border-gray-100 dark:border-gray-700">
-                {{ $articles->links() }}
-            </div>
-        @endif
     </div>
+
+    <script>
+        function articlesManager() {
+            return {
+                searchQuery: '',
+                filterCategory: '',
+                filterStock: '',
+                showFilter: false,
+                
+                filterArticles() {
+                    const rows = document.querySelectorAll('.article-row');
+                    
+                    rows.forEach(row => {
+                        let show = true;
+                        
+                        // Search filter
+                        if (this.searchQuery) {
+                            const searchLower = this.searchQuery.toLowerCase();
+                            const reference = row.dataset.reference;
+                            const designation = row.dataset.designation;
+                            
+                            if (!reference.includes(searchLower) && !designation.includes(searchLower)) {
+                                show = false;
+                            }
+                        }
+                        
+                        // Category filter
+                        if (this.filterCategory && show) {
+                            const category = (row.dataset.category || '').toLowerCase().trim();
+                            const filterValue = this.filterCategory.toLowerCase().trim();
+                            if (category && category !== filterValue) {
+                                show = false;
+                            }
+                        }
+                        
+                        // Stock filter
+                        if (this.filterStock && show) {
+                            const stock = parseInt(row.dataset.stock);
+                            if (this.filterStock === 'low' && stock > 0) show = false;
+                            if (this.filterStock === 'available' && stock <= 0) show = false;
+                            if (this.filterStock === 'out' && stock > 0) show = false;
+                        }
+                        
+                        row.style.display = show ? '' : 'none';
+                    });
+                }
+            };
+        }
+    </script>
 </x-app-layout>
