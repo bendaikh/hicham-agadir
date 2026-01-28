@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invoice;
+use App\Services\StockService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -87,7 +90,8 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $invoice = \App\Models\Invoice::findOrFail($id);
+        $invoice = Invoice::with('items')->findOrFail($id);
+        $oldStatus = $invoice->status;
 
         $validated = $request->validate([
             'invoice_number' => 'required|string|unique:invoices,invoice_number,' . $id,
@@ -100,29 +104,69 @@ class InvoiceController extends Controller
 
         $items = json_decode($request->items_json, true);
 
-        $invoice->update([
-            'invoice_number' => $validated['invoice_number'],
-            'client_id' => $validated['client_id'],
-            'due_date' => $validated['due_date'],
-            'total_amount' => $validated['total_amount'],
-            'status' => $validated['status'],
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // Delete existing items
-        $invoice->items()->delete();
+            // Handle status change to 'payee' - consume reserved stock
+            if ($oldStatus !== 'payee' && $validated['status'] === 'payee') {
+                // Get the related quote to find the quote ID
+                $quote = \App\Models\Quote::where('invoice_id', $invoice->id)->first();
+                
+                if ($quote) {
+                    // Consume reserved stock for all items
+                    foreach ($invoice->items as $item) {
+                        $article = \App\Models\Article::find($item->article_id);
+                        if ($article) {
+                            // Decrease actual stock
+                            $article->decrement('stock_quantity', $item->quantity);
+                            
+                            // Decrease reserved quantity
+                            $article->decrement('reserved_quantity', $item->quantity);
+                            
+                            // Log the consumption
+                            \App\Models\StockMovement::record(
+                                articleId: $item->article_id,
+                                quantity: $item->quantity,
+                                movementType: 'out',
+                                referenceType: 'invoice',
+                                referenceId: $invoice->id,
+                                reference: $invoice->invoice_number,
+                                notes: "Stock consumed - invoice {$invoice->invoice_number} marked as paid"
+                            );
+                        }
+                    }
+                }
+            }
 
-        // Create new items
-        foreach ($items as $item) {
-            \App\Models\InvoiceItem::create([
-                'invoice_id' => $invoice->id,
-                'article_id' => $item['article_id'],
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'total_price' => $item['total_price'],
+            $invoice->update([
+                'invoice_number' => $validated['invoice_number'],
+                'client_id' => $validated['client_id'],
+                'due_date' => $validated['due_date'],
+                'total_amount' => $validated['total_amount'],
+                'status' => $validated['status'],
             ]);
-        }
 
-        return redirect()->route('invoices.show', $invoice->id)->with('success', 'Facture mise à jour avec succès');
+            // Delete existing items
+            $invoice->items()->delete();
+
+            // Create new items
+            foreach ($items as $item) {
+                \App\Models\InvoiceItem::create([
+                    'invoice_id' => $invoice->id,
+                    'article_id' => $item['article_id'],
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_price' => $item['total_price'],
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('invoices.show', $invoice->id)->with('success', 'Facture mise à jour avec succès');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Erreur lors de la mise à jour: ' . $e->getMessage()])->withInput();
+        }
     }
 
     /**

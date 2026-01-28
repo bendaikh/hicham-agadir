@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('suppliers', SupplierController::class);
     Route::resource('articles', ArticleController::class);
     Route::resource('purchases', PurchaseController::class);
+    Route::post('/purchases/{purchase}/record-payment', [PurchaseController::class, 'recordPayment'])->name('purchases.record-payment');
     Route::resource('invoices', InvoiceController::class);
     Route::resource('quotes', QuoteController::class);
     Route::post('/quotes/{quote}/convert-to-invoice', [QuoteController::class, 'convertToInvoice'])->name('quotes.convert-to-invoice');

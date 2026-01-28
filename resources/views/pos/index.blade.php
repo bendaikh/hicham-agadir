@@ -149,10 +149,10 @@
                                 <h4 class="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate" x-text="item.name"></h4>
                                 <p class="text-xs text-gray-500" x-text="formatPrice(item.price) + ' / ' + item.unit"></p>
                                 <div class="flex items-center gap-2 mt-2">
-                                    <button @click="decreaseQuantity(index)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">-</button>
-                                    <input type="number" x-model.number="item.quantity" @input="updateQuantity(index)" min="1" :max="item.stock" class="w-12 text-center text-sm font-semibold border-0 bg-transparent focus:outline-none">
-                                    <button @click="increaseQuantity(index)" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold">+</button>
-                                    <button @click="removeItem(index)" class="ml-auto text-red-500 hover:text-red-700">
+                                    <button @click="decreaseQuantity(index)" class="w-8 h-8 rounded-lg bg-red-100 hover:bg-red-200 flex items-center justify-center text-red-600 font-bold transition">−</button>
+                                    <input type="number" x-model.number="item.quantity" @input="updateQuantity(index)" min="1" :max="item.stock" class="w-16 text-center text-sm font-semibold border-2 border-blue-400 bg-blue-50 dark:bg-blue-900/30 dark:border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white text-gray-900">
+                                    <button @click="increaseQuantity(index)" class="w-8 h-8 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center text-green-600 font-bold transition">+</button>
+                                    <button @click="removeItem(index)" class="ml-auto text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>

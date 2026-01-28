@@ -247,7 +247,8 @@ class QuoteController extends Controller
                 'due_date' => now()->addDays(30),
             ]);
 
-            // Copy items from quote to invoice and consume reserved stock
+            // Copy items from quote to invoice
+            // NOTE: Stock remains 'reserved' until invoice is marked as paid
             $quoteItems = $quote->items;
             foreach ($quoteItems as $quoteItem) {
                 InvoiceItem::create([
@@ -259,13 +260,8 @@ class QuoteController extends Controller
                 ]);
             }
 
-            // Consume reserved stock (moves from 'reserved' to 'out')
-            StockService::consumeReservedStock(
-                $quote->id,
-                $invoice->id,
-                $quote->quote_number,
-                $invoiceNumber
-            );
+            // NOTE: Do NOT consume reserved stock here
+            // Stock will be consumed when invoice is marked as paid (status = payee)
 
             // Update quote to link with invoice
             $quote->update(['invoice_id' => $invoice->id]);

@@ -120,6 +120,43 @@ class PurchaseController extends Controller
     }
 
     /**
+     * Record a payment for a purchase
+     */
+    public function recordPayment(Request $request, Purchase $purchase)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|in:cash,card,cheque,bank_transfer,mobile_payment',
+            'payment_date' => 'required|date',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Create the payment record
+            $purchase->payments()->create([
+                'amount' => $validated['amount'],
+                'payment_method' => $validated['payment_method'],
+                'payment_date' => $validated['payment_date'],
+            ]);
+
+            // Check if all amount is paid
+            $totalPaid = $purchase->payments()->sum('amount');
+            if ($totalPaid >= $purchase->total_amount) {
+                $purchase->update(['status' => 'completed']);
+            }
+
+            DB::commit();
+
+            return redirect()->route('purchases.show', $purchase)
+                ->with('success', 'Paiement enregistré avec succès.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Purchase $purchase)
