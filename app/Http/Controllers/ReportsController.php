@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
 use App\Models\Invoice;
 use App\Models\Purchase;
@@ -98,11 +99,20 @@ class ReportsController extends Controller
             'totalInvoices' => $totalInvoices,
         ];
         
-        // Generate HTML report
-        $html = view('reports.export', $data)->render();
-        
-        return response($html, 200)
-            ->header('Content-Type', 'text/html; charset=utf-8')
-            ->header('Content-Disposition', 'attachment; filename="rapport-' . now()->format('Y-m-d-H-i-s') . '.html"');
+        try {
+            // Generate HTML report
+            $html = view('reports.export', $data)->render();
+
+            // Generate PDF from HTML using dompdf
+            $pdf = PDF::loadHTML($html)->setPaper('a4', 'portrait');
+
+            $filename = 'rapport-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            // Log and return a 500 response so the client can surface details
+            logger()->error('Reports export failed: ' . $e->getMessage(), ['exception' => $e]);
+            return response('Export failed on server', 500);
+        }
     }
 }

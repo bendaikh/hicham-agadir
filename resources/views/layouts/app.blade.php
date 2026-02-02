@@ -35,7 +35,7 @@
                         </button>
 
                         <!-- Search Bar -->
-                        <div class="flex-1 max-w-xl mx-4 hidden sm:block" x-data="globalSearch()">
+                        <div class="flex-1 max-w-xl mx-4 hidden sm:block" x-data="globalSearch">
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

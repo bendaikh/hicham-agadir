@@ -1,5 +1,6 @@
 <x-app-layout>
-    <div class="flex items-center justify-between mb-8" x-data="reportsManager()" x-init="init()" :class="{ 'opacity-50': isLoading }">
+    <div x-data="reportsManager()" x-init="init()">
+        <div class="flex items-center justify-between mb-8" :class="{ 'opacity-50': isLoading }">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Analyses & Rapports</h1>
             <p class="text-gray-500">Visualisez les performances de votre entreprise</p>
@@ -278,102 +279,11 @@
             </div>
 
             <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
-                <button @click="exportReport()" :disabled="isLoading" class="w-full py-3 text-sm font-bold text-blue-600 border border-blue-200 dark:border-blue-900 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                <button @click="exportReport()" class="w-full py-3 text-sm font-bold text-blue-600 border border-blue-200 dark:border-blue-900 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
                     Générer un rapport complet
                 </button>
             </div>
         </div>
     </div>
 
-    <script>
-        function reportsManager() {
-            const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            
-            return {
-                selectedPeriod: 'month',
-                startDate: firstDay.toISOString().split('T')[0],
-                endDate: today.toISOString().split('T')[0],
-                isLoading: false,
-                
-                init() {
-                    // Get current period from URL if exists
-                    const params = new URLSearchParams(window.location.search);
-                    const period = params.get('period');
-                    if (period) {
-                        this.selectedPeriod = period;
-                        
-                        // Restore custom dates if provided
-                        if (period === 'custom') {
-                            const startDate = params.get('start_date');
-                            const endDate = params.get('end_date');
-                            if (startDate) this.startDate = startDate;
-                            if (endDate) this.endDate = endDate;
-                        }
-                    }
-                },
-                
-                updatePeriod() {
-                    if (this.isLoading) return; // Prevent multiple clicks
-                    
-                    // Validate custom dates
-                    if (this.selectedPeriod === 'custom') {
-                        if (!this.startDate || !this.endDate) {
-                            alert('Veuillez sélectionner une date de début et de fin');
-                            return;
-                        }
-                        if (new Date(this.startDate) > new Date(this.endDate)) {
-                            alert('La date de début doit être avant la date de fin');
-                            return;
-                        }
-                    }
-                    
-                    // Show loading state
-                    this.isLoading = true;
-                    
-                    // Add slight delay to show transition
-                    setTimeout(() => {
-                        const params = new URLSearchParams();
-                        params.set('period', this.selectedPeriod);
-                        
-                        if (this.selectedPeriod === 'custom') {
-                            params.set('start_date', this.startDate);
-                            params.set('end_date', this.endDate);
-                        }
-                        
-                        window.location.href = `/reports?${params.toString()}`;
-                    }, 200);
-                },
-                
-                exportReport() {
-                    if (this.isLoading) return; // Prevent multiple clicks
-                    
-                    // Validate custom dates
-                    if (this.selectedPeriod === 'custom') {
-                        if (!this.startDate || !this.endDate) {
-                            alert('Veuillez sélectionner une date de début et de fin');
-                            return;
-                        }
-                        if (new Date(this.startDate) > new Date(this.endDate)) {
-                            alert('La date de début doit être avant la date de fin');
-                            return;
-                        }
-                    }
-                    
-                    // Show loading state
-                    this.isLoading = true;
-                    
-                    const params = new URLSearchParams();
-                    params.set('period', this.selectedPeriod);
-                    
-                    if (this.selectedPeriod === 'custom') {
-                        params.set('start_date', this.startDate);
-                        params.set('end_date', this.endDate);
-                    }
-                    
-                    window.location.href = `/reports/export?${params.toString()}`;
-                }
-            };
-        }
-    </script>
 </x-app-layout>
